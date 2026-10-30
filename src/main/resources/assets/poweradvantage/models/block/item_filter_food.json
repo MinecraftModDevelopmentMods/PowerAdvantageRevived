@@ -1,10 +1,10 @@
 {
     "parent": "poweradvantage:block/conveyor_base",
     "textures": {
-        "top": "poweradvantage:blocks/item_conveyor_top",
-        "bottom": "poweradvantage:blocks/filter_bottom",
-        "side": "poweradvantage:blocks/filter_side_food",
-        "end": "poweradvantage:blocks/item_conveyor_end",
-        "rim": "poweradvantage:materials/steel"
+        "top": "poweradvantage:block/item_conveyor_top",
+        "bottom": "poweradvantage:block/filter_bottom",
+        "side": "poweradvantage:block/filter_side_food",
+        "end": "poweradvantage:block/item_conveyor_end",
+        "rim": "poweradvantage:block/materials/steel"
     }
 }

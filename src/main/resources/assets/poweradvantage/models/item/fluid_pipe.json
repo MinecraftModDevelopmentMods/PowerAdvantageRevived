@@ -1,4 +1,3 @@
 {
-    "parent": "poweradvantage:block/fluid_pipe_ns",
-    "ambientocclusion": false
+  "parent": "poweradvantage:block/fluid_pipe_n"
 }

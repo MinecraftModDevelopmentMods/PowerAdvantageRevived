@@ -1,8 +1,8 @@
 {
     "parent": "block/cube_bottom_top",
     "textures": {
-        "top": "poweradvantage:blocks/fluid_drain_face",
-        "bottom": "poweradvantage:blocks/fluid_drain_side",
-        "side": "poweradvantage:blocks/fluid_drain_side"
+        "top": "poweradvantage:block/fluid_drain_face",
+        "bottom": "poweradvantage:block/fluid_drain_side",
+        "side": "poweradvantage:block/fluid_drain_side"
     }
 }

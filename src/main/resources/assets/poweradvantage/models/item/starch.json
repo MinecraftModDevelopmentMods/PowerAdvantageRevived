@@ -1,6 +1,6 @@
 {
   "parent": "item/generated",
     "textures": {
-        "layer0": "poweradvantage:items/starch"
+        "layer0": "poweradvantage:item/starch"
     }
 }

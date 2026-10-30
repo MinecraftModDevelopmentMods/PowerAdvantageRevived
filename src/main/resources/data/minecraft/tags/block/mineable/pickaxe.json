@@ -1,0 +1,14 @@
+{
+  "replace": false,
+  "values": [
+    "poweradvantage:infinite_steam",
+    "poweradvantage:infinite_power",
+    "poweradvantage:fluid_drain",
+    "poweradvantage:fluid_discharge",
+    "poweradvantage:fluid_storage_tank",
+    "poweradvantage:fluid_metal_tank",
+    "poweradvantage:steel_frame",
+    "poweradvantage:fluid_pipe",
+    "poweradvantage:fluid_pipe_terminal"
+  ]
+}

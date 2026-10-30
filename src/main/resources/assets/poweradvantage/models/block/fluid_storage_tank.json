@@ -1,9 +1,9 @@
 {
   "parent": "block/block",
   "textures": {
-        "walls": "poweradvantage:materials/plastic",
-        "supports": "poweradvantage:materials/steel",
-        "particle": "poweradvantage:materials/plastic"
+        "walls": "poweradvantage:block/materials/plastic",
+        "supports": "poweradvantage:block/materials/steel",
+        "particle": "poweradvantage:block/materials/plastic"
     },
     "elements": [
         {   

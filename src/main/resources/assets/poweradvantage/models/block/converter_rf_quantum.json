@@ -1,10 +1,10 @@
 {
   "parent": "block/block",
   "textures": {
-        "face": "poweradvantage:blocks/steel_frame",
+        "face": "poweradvantage:block/steel_frame",
         "core": "minecraft:blocks/ice_packed",
-        "plug": "poweradvantage:blocks/filter_bottom",
-        "particle": "poweradvantage:materials/steel"
+        "plug": "poweradvantage:block/filter_bottom",
+        "particle": "poweradvantage:block/materials/steel"
     },
     "elements": [
         {   

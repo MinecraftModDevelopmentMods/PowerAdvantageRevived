@@ -1,0 +1,7 @@
+{
+  "module": "poweradvantage:machine",
+  "block_entity_data": {
+    "kind": "DISCHARGE",
+    "capacity": 1000
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "factory": "poweradvantage:machine",
+  "template": {
+    "properties": {
+      "hardness": 1.5,
+      "blast_resistance": 6,
+      "requires_correct_tool": true
+    },
+    "tags": [
+      "minecraft:mineable/pickaxe"
+    ]
+  },
+  "part": {
+    "block_entity": {
+      "factory": "poweradvantage:machine",
+      "factory_data": {
+        "kind": "TANK",
+        "capacity": 4000
+      }
+    }
+  }
+}

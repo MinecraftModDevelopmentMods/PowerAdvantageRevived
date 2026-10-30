@@ -1,10 +1,10 @@
 {
   "parent": "block/block",
   "textures": {
-        "face": "poweradvantage:blocks/steel_frame",
-        "core": "poweradvantage:materials/brass",
-        "plug": "poweradvantage:blocks/filter_bottom",
-        "particle": "poweradvantage:materials/steel"
+        "face": "poweradvantage:block/steel_frame",
+        "core": "poweradvantage:block/materials/brass",
+        "plug": "poweradvantage:block/filter_bottom",
+        "particle": "poweradvantage:block/materials/steel"
     },
     "elements": [
         {   

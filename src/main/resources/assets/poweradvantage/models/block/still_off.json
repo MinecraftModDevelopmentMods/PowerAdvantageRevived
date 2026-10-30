@@ -4,8 +4,8 @@
         "top": "blocks/furnace_top",
         "front": "blocks/furnace_front_off",
         "side": "blocks/furnace_side",
-        "tank": "poweradvantage:materials/steel",
-        "particle": "poweradvantage:materials/steel"
+        "tank": "poweradvantage:block/materials/steel",
+        "particle": "poweradvantage:block/materials/steel"
     },
     "elements": [
         {   

@@ -1,6 +1,6 @@
 {
   "parent": "item/generated",
     "textures": {
-        "layer0": "poweradvantage:items/bucket_refined_oil"
+        "layer0": "poweradvantage:item/bucket_refined_oil"
     }
 }

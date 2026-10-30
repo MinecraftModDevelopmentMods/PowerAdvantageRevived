@@ -1,0 +1,13 @@
+{
+  "factory": "poweradvantage:frame",
+  "template": {
+    "properties": {
+      "hardness": 0.75,
+      "blast_resistance": 6,
+      "requires_correct_tool": true
+    },
+    "tags": [
+      "minecraft:mineable/pickaxe"
+    ]
+  }
+}
