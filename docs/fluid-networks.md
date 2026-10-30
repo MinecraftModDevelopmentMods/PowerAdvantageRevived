@@ -52,8 +52,10 @@ silently draining arbitrary tanks behind a network. To feed a pull-only consumer
 use a terminal at the source; the network inserts into the consumer's fluid handler.
 A network with no accepting destination refuses the offered fluid.
 
-`FluidNetworks` owns each dimension's networks; `PipeGraph` compresses their
-physical connections. Endpoint capability caches include sided access and null
+`FluidNetworks` delegates discovery and component lifecycle to the shared
+`TransportNetworks` manager; `RoutingGraph` compresses physical connections.
+`FluidTransportAdapter` supplies fluid-specific topology and endpoint policies.
+See [the shared transport API](transport-core.md). Endpoint capability caches include sided access and null
 results at occupied boundaries. NeoForge capability invalidation rebuilds affected
 components when capabilities appear/disappear or providers are replaced. Contents
 and acceptance are simulated live, rather than cached as permanent resource rules.
@@ -77,8 +79,8 @@ steps (up to 32 per network per pass), 256 simulated destination attempts, and 2
 executed/source attempts. At most one matching chunk section (4,096 positions) is
 scanned per tick, after cheap palette checks. Route caches and outstanding route
 jobs each hold at most 32 ingress routes per network. A cold route refuses transfer
-until budgeted Dijkstra computation finishes. Straight-chain interior entries use
-a graph-end anchor for ordering; all destinations remain in the same component.
+until budgeted Dijkstra computation finishes. Straight-chain interior entries now retain exact reachable paths through the
+compressed graph, including the correct direction on one-way transport.
 Fair destination rotation takes precedence over strict nearest-first delivery.
 
 The work budgets limit world queries and graph work; they are not a measured

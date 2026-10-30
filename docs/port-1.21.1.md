@@ -12,7 +12,8 @@ when installing the built Power Advantage JAR. `libs/` is ignored by Git.
 
 ## Content and implementation
 
-Seven standalone blocks are defined under `src/main/resources/mmdlib/standalone/block`.
+The seven original blocks, two fluid-pipe forms and standard conveyor are defined
+under `src/main/resources/mmdlib/standalone/block`.
 The machine module supplies the shared block/entity factory; standalone settings
 select behavior and capacity. MMDLib loads the definitions, and Power Advantage
 queues its namespace through `RuntimeContentRegistrar`. No dummy machine
@@ -77,3 +78,8 @@ Steam's client fluid texture IDs use the same canonical block paths. A headless
 NeoForge client completed atlas creation after this migration, with no Power
 Advantage missing-model or missing-texture warnings. In-world appearance remains
 an interactive verification step.
+
+
+The standard physical conveyor is now implemented; see [conveyor operation and
+extension settings](conveyor-networks.md). Specialized dropping/crossover forms
+remain downstream work.

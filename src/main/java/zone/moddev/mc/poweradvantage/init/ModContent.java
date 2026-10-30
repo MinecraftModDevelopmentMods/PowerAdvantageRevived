@@ -71,6 +71,14 @@ public final class ModContent {
                 }
             });
         }
+        api.registerBlockImplementation(id("item_conveyor"), new BlockImplementation<zone.moddev.mc.poweradvantage.blocks.ConveyorBlock>() {
+            public Class<zone.moddev.mc.poweradvantage.blocks.ConveyorBlock> blockClass() { return zone.moddev.mc.poweradvantage.blocks.ConveyorBlock.class; }
+            public zone.moddev.mc.poweradvantage.blocks.ConveyorBlock create(MMDMaterial material, MMDBlock definition) { throw new IllegalStateException("Requires context"); }
+            public zone.moddev.mc.poweradvantage.blocks.ConveyorBlock create(BlockContext context) {
+                return new zone.moddev.mc.poweradvantage.blocks.ConveyorBlock(context.properties());
+            }
+        });
+        bus.addListener(zone.moddev.mc.poweradvantage.conveyor.ConveyorPackets::register);
         runtime = new RuntimeContentRegistrar(PowerAdvantage.MODID, api, bus);
         // MMDLib's AFTER dependency ordering loads definitions before this queued work.
         bus.addListener((FMLConstructModEvent event) -> event.enqueueWork(() -> {
@@ -91,6 +99,8 @@ public final class ModContent {
             zone.moddev.mc.poweradvantage.blocks.FluidPipeBlock.registerCapabilities(event,
                 (zone.moddev.mc.poweradvantage.blocks.FluidPipeBlock)block);
         }
+        zone.moddev.mc.poweradvantage.blocks.ConveyorBlock.registerCapabilities(event,
+            (zone.moddev.mc.poweradvantage.blocks.ConveyorBlock)net.minecraft.core.registries.BuiltInRegistries.BLOCK.get(id("item_conveyor")));
         runtime.blockEntityTypes().forEach((id, holder) -> {
             var type = (BlockEntityType<MachineBlockEntity>) holder.get();
             if (id.getPath().equals("infinite_power")) MachineCapabilities.energy(event, type, be -> be.energy);

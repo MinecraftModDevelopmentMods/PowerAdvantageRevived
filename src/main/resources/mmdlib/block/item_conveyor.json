@@ -1,0 +1,13 @@
+{
+  "factory": "poweradvantage:item_conveyor",
+  "template": {
+    "properties": {
+      "hardness": 1.5,
+      "blast_resistance": 6,
+      "requires_correct_tool": true
+    },
+    "tags": [
+      "minecraft:mineable/pickaxe"
+    ]
+  }
+}

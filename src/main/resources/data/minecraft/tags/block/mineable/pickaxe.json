@@ -9,6 +9,7 @@
     "poweradvantage:fluid_metal_tank",
     "poweradvantage:steel_frame",
     "poweradvantage:fluid_pipe",
-    "poweradvantage:fluid_pipe_terminal"
+    "poweradvantage:fluid_pipe_terminal",
+    "poweradvantage:item_conveyor"
   ]
 }
