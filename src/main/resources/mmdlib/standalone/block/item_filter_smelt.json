@@ -1,0 +1,6 @@
+{
+  "module": "poweradvantage:item_filter",
+  "block_entity_data": {
+    "kind": "SMELT"
+  }
+}

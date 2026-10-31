@@ -1,0 +1,29 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "xxx",
+    "xpx",
+    "xxx"
+  ],
+  "key": {
+    "x": {
+      "tag": "c:ingots/steel"
+    },
+    "p": {
+      "tag": "poweradvantage:fluid_pipes"
+    }
+  },
+  "result": {
+    "id": "poweradvantage:fluid_metal_tank"
+  },
+  "group": "fluid_machines",
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:not",
+      "value": {
+        "type": "neoforge:tag_empty",
+        "tag": "c:ingots/steel"
+      }
+    }
+  ]
+}

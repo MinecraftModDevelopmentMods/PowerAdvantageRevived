@@ -1,0 +1,15 @@
+<screen xmlns="https://moddev.zone/mmdlib/screen"
+        title="block.poweradvantage.converter_rf_steam"
+        block-entity="zone.moddev.mc.poweradvantage.power.SteamConverterBlockEntity"
+        inventory="none">
+  <vbox padding="8" spacing="5" align="center">
+    <label text="screen.poweradvantage.converter_fe" text-fallback="FE / RF"/>
+    <gauge id="fe" orientation="horizontal" length="8s" color="#DCA92B"
+           value="#screenFe" max="#screenFeCapacity"
+           tooltip="screen.poweradvantage.energy_amount" tooltip-fallback="{value} / {max} FE"/>
+    <label text="fluid_type.poweradvantage.steam" text-fallback="Steam"/>
+    <gauge id="steam" orientation="horizontal" length="8s"
+           value="#screenSteam" max="#screenSteamCapacity"
+           tooltip="screen.poweradvantage.fluid_amount" tooltip-fallback="{value} / {max} mB"/>
+  </vbox>
+</screen>

@@ -12,7 +12,8 @@ when installing the built Power Advantage JAR. `libs/` is ignored by Git.
 
 ## Content and implementation
 
-The seven original blocks, two fluid-pipe forms and standard conveyor are defined
+Machines, the frame, two fluid-pipe forms, fluid switch, standard conveyor and
+eight item filters are defined
 under `src/main/resources/mmdlib/standalone/block`.
 The machine module supplies the shared block/entity factory; standalone settings
 select behavior and capacity. MMDLib loads the definitions, and Power Advantage
@@ -25,7 +26,14 @@ material or BaseMetals dependency is required.
 - Discharge: 1,000 mB buffer; imports from neighbors and places fluid below every ten ticks.
 - Storage tanks: 4,000 and 16,000 mB; weak/strong redstone and comparator output
   scale from 0 to 15 with their fill level.
+- Distillery: two 4,000 mB tanks converting fluids through data-driven recipes; see [distillation](distillation.md).
+- Steam–FE/RF converter: one mB ↔ eight FE, steam-only tank and pipe/bucket interaction; see [steam converter](steam-converter.md).
+- FE/RF–electricity converter: exact bidirectional exchange through distinct power capabilities; see [converter](electricity-converter.md).
 - Steel frame: retains the existing model and texture.
+- Fluid switch and item filters: see [restored content](pa2-content-port.md) and [item filters](item-filters.md).
+
+Machines use MMDLib XML screens and its registered menu/opening/synchronization path.
+The unused PA-specific menu and renderer have been removed.
 
 Machines use MMDLib `FluidStorage`, `EnergyBuffer`, capability registration, and
 transfer helpers. Storage is persisted through registry-aware NBT. World-fluid
@@ -35,18 +43,20 @@ removes a source it cannot hold. Collection supports `BucketPickup`, including
 waterlogged blocks. Discharge places into air or liquid space and delegates
 placement and dimension vaporization behavior to NeoForge's `FluidUtil`.
 
-Right-click a machine to open its synchronized status screen. Use fluid containers
-on the block to fill or empty its tank. The screen follows `mmdlib-test-mod`:
-a NeoForge menu/screen using MMDLib panel and meter sprites. It does not depend
-on the XML screen runtime. Steam accepts extraction only; its bucket is registered
-with a NeoForge dynamic fluid-container model.
+Right-click a machine to open its MMDLib 2.0 XML screen, which uses MMDLib's
+generic menu, synchronized getter values, and fluid or energy gauge. Use fluid
+containers on the block to fill or empty its tank. Machine screen definitions
+live in `mmdlib/screen/` and are selected by block-entity type; the shared
+machine definition binds right-clicks to `mmdlib:open_menu`. Steam accepts
+extraction only; its bucket is registered with a NeoForge dynamic fluid-container
+model.
 
 Existing models/textures are retained. Registered blockstates and item model
 references are updated, translations use JSON, and mining tags and self-drop loot
 tables are supplied. The old unused example config and empty registration hooks
 have been removed. The fluid network is now implemented; see [fluid networks](fluid-networks.md).
-The legacy abstract conduit API remains an extension point. No new recipes or previously
-unimplemented machines are introduced. This port does not migrate 1.12 worlds or
+The legacy abstract conduit API remains an extension point. The only recipe added is the default distilling recipe.
+See [TODO.md](../TODO.md) for remaining unported content. This port does not migrate 1.12 worlds or
 preserve the MMDLib 1 feature-inheritance Java API for downstream add-ons.
 
 ## Validation

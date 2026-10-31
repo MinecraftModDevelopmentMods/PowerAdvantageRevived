@@ -13,61 +13,237 @@ import net.neoforged.neoforge.items.IItemHandler;
 import zone.moddev.mc.poweradvantage.blocks.ConveyorBlock;
 import zone.moddev.mc.poweradvantage.network.transport.*;
 
-/** Physical store-and-forward belts. No server entities are used for stacks on the belt. */
+/**
+ * Server-thread physical conveyor engine, one instance per dimension. Owns movement, admission, extraction and
+ * pickup while the shared transport core owns topology. Cargo persists independently of chunk loading; one
+ * processed update cannot traverse multiple segments.
+ */
 public final class ConveyorNetworks {
+    /**
+     * Dimension-to-conveyor-engine registry, released on level unload.
+     */
     private static final Map<ServerLevel,ConveyorNetworks> LEVELS=Collections.synchronizedMap(new IdentityHashMap<>());
+    /**
+     * Gets or creates the server dimension's physical conveyor engine.
+     *
+     * @param level Owning server dimension
+     * @return dimension conveyor manager
+     */
     public static ConveyorNetworks get(ServerLevel level){return LEVELS.computeIfAbsent(level,ConveyorNetworks::new);}
+    /**
+     * Releases derived runtime state; saved cargo remains in dimension SavedData.
+     *
+     * @param level Owning server dimension
+     */
     public static void unload(ServerLevel level){LEVELS.remove(level);}
+    /**
+     * Global work budgets selected before managers are constructed.
+     */
     private static ConveyorLimits configured=ConveyorLimits.DEFAULT;
-    /** Configure during mod setup, before any dimension creates a conveyor manager. */
+    /**
+     * Configure during mod setup, before any dimension creates a conveyor manager.
+     *
+     * @param limits Work budgets captured for this manager lifetime
+     * @throws IllegalStateException if any dimension already has a conveyor manager
+     */
     public static void configureLimits(ConveyorLimits limits) {
         synchronized(LEVELS) {
             if(!LEVELS.isEmpty())throw new IllegalStateException("Configure conveyor work budgets before world creation");
             configured=Objects.requireNonNull(limits);
         }
     }
+    /**
+     * Owning server dimension.
+     */
     private final ServerLevel level;
+    /**
+     * Work budgets captured for this manager lifetime.
+     */
     private final ConveyorLimits limits;
+    /**
+     * Shared directed component manager for conveyor channels and inventory ports.
+     */
     private final TransportNetworks<CapabilityEndpoint<IItemHandler>> topology;
+    /**
+     * Saved authoritative cargo ownership and spatial indexes.
+     */
     final ConveyorStore store;
+    /**
+     * Rotating queue of active cargo UUIDs.
+     */
     private final ArrayDeque<UUID> scheduled=new ArrayDeque<>();
+    /**
+     * UUIDs already present in the active queue.
+     */
     private final Set<UUID> queued=new HashSet<>();
+    /**
+     * Deferred chunk notifications whose suspended records need reactivation.
+     */
     private final ConcurrentLinkedQueue<LevelChunk> waking=new ConcurrentLinkedQueue<>();
+    /**
+     * Segments protected against reentrant insertion, pickup or removal.
+     * Segments freed this tick that must wait until a later tick for reuse.
+     */
     private final Set<TransportNode> reserved=new HashSet<>(),vacated=new HashSet<>();
+    /**
+     * Per-segment arriving/departing item counts charged this tick.
+     */
     private final Map<TransportNode,Integer> used=new HashMap<>();
+    /**
+     * Per-tick simulated and executed inventory operation counters.
+     */
     private final WorkBudget operations;
+    /**
+     * Rotating inventory-extraction endpoint scheduler.
+     */
     private final FairScheduler sources=new FairScheduler();
+    /**
+     * Bounded LRU table retaining next extraction slot per stable source identity.
+     */
     private final Map<SourceKey,Integer> slots=new LinkedHashMap<>(16,0.75f,true) {
+        /**
+         * Enforces the bounded least-recently-used cache or cursor table.
+         *
+         * @param entry eldest cached entry being considered for eviction
+         * @return true when this eldest entry exceeds the configured bound
+         */
         @Override protected boolean removeEldestEntry(Map.Entry<SourceKey,Integer> entry){return size()>2048;}
     };
-    private long tick=Long.MIN_VALUE,lastTick=Long.MIN_VALUE;private boolean ticking;
+    /**
+     * Tick owning quantity and vacancy accounting.
+     * Last world tick processed, preventing repeated movement calls within one tick.
+     */
+    private long tick=Long.MIN_VALUE,lastTick=Long.MIN_VALUE;
+    /**
+     * Guard against reentrant execution of the whole engine.
+     */
+    private boolean ticking;
+    /**
+     * Chunk-watcher snapshot scheduler.
+     */
     private final ConveyorSync sync;
+    /**
+     * Stable identity for an extraction port across topology rebuilds, used to rotate inventory slots.
+     *
+     * @param node Conveyor channel admitting extracted items
+     * @param position Source inventory block position
+     * @param face Source inventory capability face
+     */
     private record SourceKey(TransportNode node,BlockPos position,Direction face) {}
+    /**
+     * Detached diagnostic view of a carried stack. The stack is copied from authoritative storage; mutating it does
+     * not update the conveyor.
+     *
+     * @param id Stable cargo record UUID
+     * @param node Channel currently owning the cargo
+     * @param stack Detached copy of carried contents and components
+     * @param entry Incoming face at the current segment
+     * @param progress Processed travel ticks within the current segment
+     */
     public record Item(UUID id,TransportNode node,ItemStack stack,Direction entry,int progress) {}
+    /**
+     * Attaches the shared topology manager, durable cargo store, active-record queue and client snapshot scheduler
+     * to this dimension.
+     *
+     * @param level Owning server dimension
+     */
     private ConveyorNetworks(ServerLevel level) {
         this.level=level;limits=configured;operations=new WorkBudget(limits.operationsPerTick());
         topology=new TransportNetworks<>(level,new ConveyorTransportAdapter());
         store=level.getDataStorage().computeIfAbsent(ConveyorStore.factory(),"poweradvantage_conveyors");
         for(var item:store.records.values())if(level.isLoaded(item.node.position()))schedule(item.id);sync=new ConveyorSync(level,this,limits.snapshotPacketsPerTick());
     }
+    /**
+     * Copies cargo into detached diagnostic views; this does not expose authoritative mutable stacks.
+     *
+     * @return current diagnostic cargo snapshots
+     */
     public List<Item> items(){return store.records.values().stream().map(i->new Item(i.id,i.node,i.stack.copy(),i.entry,i.progress)).toList();}
+    /**
+     * Invalidates affected transport components and queues replacement topology discovery.
+     *
+     * @param pos block position being queried or changed
+     */
     public void changed(BlockPos pos){topology.changed(pos);}
+    /**
+     * Forwards meaningful server neighbor changes while ignoring unchanged content notifications.
+     *
+     * @param pos block position being queried or changed
+     * @param from neighbor position that caused the notification
+     */
     public void neighbourChanged(BlockPos pos,BlockPos from){topology.neighbourChanged(pos,from);}
+    /**
+     * Enqueues deferred inspection of this chunk without reading it before FULL promotion.
+     *
+     * @param chunk chunk instance or coordinate from the lifecycle event
+     */
     public void chunkLoaded(LevelChunk chunk){topology.chunkLoaded(chunk);waking.add(chunk);}
+    /**
+     * Queues chunk withdrawal so routing suspends across the boundary before further transfers.
+     *
+     * @param pos chunk coordinate being watched or withdrawn
+     */
     public void chunkUnloaded(ChunkPos pos){topology.chunkUnloaded(pos);}
+    /**
+     * Schedules initial cargo state for a player after native chunk transmission.
+     *
+     * @param player interacting or watching player
+     * @param pos chunk coordinate being watched or withdrawn
+     */
     public void watch(ServerPlayer player,ChunkPos pos){sync.watch(player,pos);}
+    /**
+     * Removes a player/chunk subscription and pending cargo snapshot job.
+     *
+     * @param player interacting or watching player
+     * @param pos chunk coordinate being watched or withdrawn
+     */
     public void unwatch(ServerPlayer player,ChunkPos pos){sync.unwatch(player,pos);}
+    /**
+     * Resets per-tick operation, quantity and vacancy accounting when game time changes.
+     */
     private void begin() {
         long now=level.getGameTime();operations.begin(now);
         if(now!=tick){tick=now;used.clear();vacated.clear();}
     }
+    /**
+     * Finds the loaded block exposing this channel without loading chunks.
+     *
+     * @param node physical position/channel identity
+     * @return recognized conveyor block, or null
+     */
     private ConveyorBlock belt(TransportNode node) {
         return topology.contains(node)?(ConveyorBlock)level.getBlockState(node.position()).getBlock():null;
     }
+    /**
+     * Calculates unused per-channel item-count allowance for the current tick.
+     *
+     * @param node physical position/channel identity
+     * @param belt conveyor block supplying the immutable local item-count rating
+     * @return nonnegative remaining item count
+     */
     private int remaining(TransportNode node,ConveyorBlock belt){return Math.max(0,belt.itemsPerTick()-used.getOrDefault(node,0));}
+    /**
+     * Charges arriving or departing items against the current channel allowance.
+     *
+     * @param node physical position/channel identity
+     * @param amount requested or accepted resource quantity in the owning engine's units
+     */
     private void charge(TransportNode node,int amount){used.merge(node,amount,Integer::sum);}
+    /**
+     * Queues a cargo UUID at most once for active processing.
+     *
+     * @param id stable cargo UUID
+     */
     private void schedule(UUID id){if(queued.add(id))scheduled.addLast(id);}
+    /**
+     * Takes ownership of a cargo record and schedules it for movement.
+     *
+     * @param item authoritative cargo record
+     */
     private void add(ConveyorStore.Travel item){store.add(item);schedule(item.id);}
+    /**
+     * Reactivates records from at most four queued, fully available chunk instances.
+     */
     private void wakeLoadedChunks() {
         for(int count=0;count<4;count++) {
             var chunk=waking.poll();if(chunk==null)return;
@@ -75,6 +251,16 @@ public final class ConveyorNetworks {
             for(var item:store.inChunk(chunk.getPos().toLong()))schedule(item.id);
         }
     }
+    /**
+     * Simulates or admits a stack at a loaded eligible segment. Honors slot capacity, per-tick allowance,
+     * reservations and vacancy headway.
+     *
+     * @param node physical position/channel identity
+     * @param entry face from which the record entered its segment
+     * @param stack item or fluid contents offered to the operation
+     * @param simulate true to predict acceptance without transferring resource ownership
+     * @return unaccepted copied remainder; empty if fully admitted
+     */
     public ItemStack offer(TransportNode node,Direction entry,ItemStack stack,boolean simulate) {
         begin();var block=belt(node);
         if(stack.isEmpty())return ItemStack.EMPTY;
@@ -94,16 +280,66 @@ public final class ConveyorNetworks {
         }
         return stack.copyWithCount(stack.getCount()-accepted);
     }
+    /**
+     * Creates the segment's insertion-only item-handler view.
+     *
+     * @param node physical position/channel identity
+     * @param face sided capability face, or null for unsided access where supported
+     * @return automation capability with extraction disabled
+     */
     public IItemHandler ingress(TransportNode node,Direction face) {
         return new IItemHandler() {
+            /**
+             * Exposes one virtual conveyor insertion slot.
+             *
+             * @return one
+             */
             public int getSlots(){return 1;}
+            /**
+             * Returns a copy of visible carried contents for a valid slot.
+             *
+             * @param slot virtual or inventory slot index
+             * @return copied carried stack, or empty
+             */
             public ItemStack getStackInSlot(int slot){var item=store.at(node);return slot==0&&item!=null?item.stack.copy():ItemStack.EMPTY;}
+            /**
+             * Admits or simulates an incoming stack through the transport interface.
+             *
+             * @param slot virtual or inventory slot index
+             * @param stack item or fluid contents offered to the operation
+             * @param simulate true to predict acceptance without transferring resource ownership
+             * @return unaccepted item remainder
+             */
             public ItemStack insertItem(int slot,ItemStack stack,boolean simulate){return slot==0?offer(node,face,stack,simulate):stack.copy();}
+            /**
+             * Refuses automation extraction from carried conveyor contents.
+             *
+             * @param slot virtual or inventory slot index
+             * @param amount requested or accepted resource quantity in the owning engine's units
+             * @param simulate true to predict acceptance without transferring resource ownership
+             * @return empty item stack
+             */
             public ItemStack extractItem(int slot,int amount,boolean simulate){return ItemStack.EMPTY;}
+            /**
+             * Advertises the local conveyor item-count ceiling for the valid virtual slot.
+             *
+             * @param slot virtual or inventory slot index
+             * @return configured limit, or zero
+             */
             public int getSlotLimit(int slot){var block=belt(node);return slot==0&&block!=null?block.itemsPerTick():0;}
+            /**
+             * Checks slot identity and the conveyor's incoming-face policy.
+             *
+             * @param slot virtual or inventory slot index
+             * @param stack item or fluid contents offered to the operation
+             * @return true if the slot and face permit this item offer
+             */
             public boolean isItemValid(int slot,ItemStack stack){var block=belt(node);return slot==0&&block!=null&&block.acceptsFrom(level.getBlockState(node.position()),face);}
         };
     }
+    /**
+     * Processes each eligible record at most once per world tick, then extraction endpoints and client snapshots.
+     */
     public void tick() {
         if(ticking||lastTick==level.getGameTime())return;lastTick=level.getGameTime();ticking=true;
         try {
@@ -120,6 +356,11 @@ public final class ConveyorNetworks {
             sync.tick();
         } finally {ticking=false;}
     }
+    /**
+     * Advances or delivers one owned record, pausing at unavailable topology, occupied outputs or full inventories.
+     *
+     * @param item authoritative cargo record
+     */
     private void process(ConveyorStore.Travel item) {
         if(!topology.available(item.node.position()))return;
         var block=belt(item.node);
@@ -164,6 +405,11 @@ public final class ConveyorNetworks {
             return;
         }
     }
+    /**
+     * Simulates and reserves intake before executing source extraction; unexpected actual contents remain owned.
+     *
+     * @param endpoint sided resource endpoint
+     */
     private void extract(CapabilityEndpoint<IItemHandler> endpoint) {
         var node=endpoint.node();var block=belt(node);
         if(block==null||store.at(node)!=null||reserved.contains(node)||vacated.contains(node)||!topology.available(endpoint.position()))return;
@@ -190,6 +436,13 @@ public final class ConveyorNetworks {
             return;
         }
     }
+    /**
+     * Collects at most one record into a nearby same-dimension player's available inventory space.
+     *
+     * @param pos block position being queried or changed
+     * @param player interacting or watching player
+     * @return number of items actually collected
+     */
     public int pickup(BlockPos pos,Player player) {
         begin();
         if(player.level()!=level||player.distanceToSqr(pos.getX()+0.5,pos.getY()+1,pos.getZ()+0.5)>36)return 0;
@@ -204,7 +457,18 @@ public final class ConveyorNetworks {
         }
         return collected;
     }
+    /**
+     * Invalidates the changed block and releases its unreserved cargo as dropped items.
+     *
+     * @param pos block position being queried or changed
+     */
     public void removed(BlockPos pos){changed(pos);for(var item:store.at(pos))drop(item);}
+    /**
+     * Releases one legal-sized portion only after a loaded world accepts its ItemEntity; any remaining ownership
+     * stays saved.
+     *
+     * @param item authoritative cargo record
+     */
     private void drop(ConveyorStore.Travel item) {
         if(reserved.contains(item.node)||!topology.available(item.node.position()))return;
         var stack=item.stack.copyWithCount(Math.min(item.stack.getCount(),item.stack.getMaxStackSize()));

@@ -1,3 +1,6 @@
+/**
+ * Loaded-world fluid search and bucket-conserving placement utilities.
+ */
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 package zone.moddev.mc.poweradvantage.util;

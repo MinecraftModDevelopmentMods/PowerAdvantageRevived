@@ -1,0 +1,12 @@
+<screen xmlns="https://moddev.zone/mmdlib/screen"
+        title="block.poweradvantage.fluid_discharge"
+        block-entity="zone.moddev.mc.poweradvantage.tiles.MachineBlockEntity"
+        inventory="none">
+  <vbox padding="8" spacing="5" align="center">
+    <label text="screen.poweradvantage.fluid" text-fallback="Fluid"/>
+    <gauge id="fluid" orientation="horizontal" length="8s"
+           value="#screenFluid" max="#screenCapacity"
+           tooltip="screen.poweradvantage.fluid_amount"
+           tooltip-fallback="{value} / {max} mB"/>
+  </vbox>
+</screen>

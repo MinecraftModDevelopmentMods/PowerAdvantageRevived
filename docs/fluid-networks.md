@@ -1,33 +1,26 @@
-# Fluid network implementation plan
+# Fluid pipe networks
 
-Implement the fluid-pipe foundation first. Conveyor transport, visible in-flight
-items, filters, crossover channels, and dropping conveyors are later work; their
-routing semantics must not be inferred from artwork alone.
+Power Advantage fluid pipes are ordinary blocks backed by one server-side network
+manager per dimension. They have no block entity, per-pipe ticker or fluid buffer.
+The shared transport core discovers loaded components and caches compressed routes;
+the fluid layer performs sided capability transfers and owns exceptional remainders.
 
-1. Register ordinary fluid pipe and extraction-terminal blocks through MMDLib's
-   standalone definitions. Neither owns a block entity. Six connection properties
-   drive the existing models and matching collision/selection shapes.
-2. Own topology in a dimension-level manager. Discover pipes when chunks load,
-   defer chunk inspection until tick, rebuild affected connected components after
-   placement/removal/neighbor changes, and never load chunks for routing.
-3. Compress chains of degree-two pipes into weighted graph edges. Keep junctions,
-   endpoints, terminals and an anchor for closed loops. Cache shortest destination
-   lists at ingress vertices; invalidate the entire affected component on changes.
-4. Offer fill-only virtual fluid capabilities on pipes. Route pushed fluid directly
-   to accepting endpoint handlers, exclude the injecting block and all extraction
-   sources, and prevent recursive routing. An explicitly oriented extraction
-   terminal pulls from its selected neighbor. Ordinary tanks never automatically
-   become sources. Recheck acceptance on every transfer; never blacklist a full tank.
-5. Bound discovery/rebuild work and transfer attempts per dimension tick. Share a
-   allowance equal to the slowest pipe rating across each connected network, rotating service among
-   ingress points, terminals and destinations. Topology rebuilds suspend affected
-   transfers. Preserve unexpected extraction remainders in dimension SavedData.
-6. Test actual registration, no block entities, connection state, compression,
-   conservation, simulation, endpoint replacement, splitting/merging, loops,
-   terminal direction, fairness and loaded-chunk boundaries. Run the original
-   machine regression suite alongside these tests and build the distributable JAR.
+For a downstream pipe implementation, start with [the Java extension example](#defining-a-pipe-in-a-downstream-mod).
+For the resource-independent API used by both fluids and conveyors, see
+[the transport core](transport-core.md).
 
-The fluid implementation and its validation are recorded below.
+```mermaid
+flowchart LR
+    E[Exporting machine] --> P[FluidPipeBlock virtual fill handler]
+    T[Extraction terminal] --> F[FluidNetworks]
+    P --> F
+    F --> A[FluidTransportAdapter]
+    A --> N[TransportNetworks component lifecycle]
+    N --> G[RoutingGraph compressed paths]
+    G --> F
+    F --> D[Destination sided fluid handler]
+    F --> R[FluidRecovery SavedData]
+```
 
 ## Implemented behavior
 
@@ -101,6 +94,84 @@ that position or restoring a source that accepts its return permits recovery.
 This safeguard covers terminal-owned extraction; external exporters remain
 responsible for honoring the actual amount returned by `fill`.
 
+## Code walkthrough
+
+The implementation is split by ownership rather than by pipe position:
+
+| Source | Responsibility |
+| --- | --- |
+| [FluidPipeBlock](../src/main/java/zone/moddev/mc/poweradvantage/blocks/FluidPipeBlock.java) | Connection state/model selection, source-face selection and virtual capability registration |
+| [FluidTransportAdapter](../src/main/java/zone/moddev/mc/poweradvantage/network/FluidTransportAdapter.java) | Pipe recognition, bidirectional adjacency, endpoint watches and static source exclusions |
+| [TransportNetworks](../src/main/java/zone/moddev/mc/poweradvantage/network/transport/TransportNetworks.java) | Loaded chunk indexes, invalidation, replacement discovery and component publication |
+| [RoutingGraph](../src/main/java/zone/moddev/mc/poweradvantage/network/transport/RoutingGraph.java) | Incremental compression, bounded Dijkstra jobs, route caches and physical path reconstruction |
+| [FluidNetworks](../src/main/java/zone/moddev/mc/poweradvantage/network/FluidNetworks.java) | Transfer admission, live acceptance, fairness, terminal extraction and retry policy |
+| [FluidRecovery](../src/main/java/zone/moddev/mc/poweradvantage/network/FluidRecovery.java) | Durable ownership of exceptional terminal extraction remainders |
+| [NetworkEvents](../src/main/java/zone/moddev/mc/poweradvantage/network/NetworkEvents.java) | Server tick, chunk and dimension lifecycle forwarding |
+
+### Placement and discovery
+
+1. Block placement/removal or a meaningful neighbor change reaches `changed`.
+   Published affected components become invalid immediately, including their old
+   channel IDs, and provisional work is withdrawn.
+2. `TransportNetworks.tick` processes unloads before loads, then one section scan.
+   Loaded-chunk inspection waits for the same instance to be available through
+   `getChunkNow`; `available` guards world access without loading chunks.
+3. `rebuildComponents` spends its fixed step budget on seeds, adapter inspection
+   and graph compression. Capability watches retain null results at occupied
+   boundaries so a provider appearing later can invalidate and rebuild the graph.
+4. `publishBuild` installs the complete graph, node set, source list, minimum rating
+   and fair quantity allowance before marking the component valid. Partial graphs
+   cannot accept a transfer.
+
+For pipe channels, weak and outgoing adjacency are both bidirectional. Compression
+retains junctions, endpoint attachments, terminals and an anchor in each otherwise
+vertex-free cycle. Physical paths are retained even though routing decisions skip
+ordinary degree-two pipe positions.
+
+### Pushed transfers
+
+An exporting machine queries a pipe's sided fluid capability and calls `fill`.
+`FluidNetworks.route` resets operation accounting for a new world tick, checks
+loaded/valid topology and the reentrancy guard, then requests its ingress turn and
+shared quantity allowance. A cold route returns zero until its bounded shortest-path
+job finishes; this is backpressure, not a permanent rejection of that fluid.
+
+`transferToDestinations` visits cached candidates in rotating order, skips the
+injecting block and explicit extraction sources, and checks the live capability
+and its current acceptance. The cached data describes reachability; it does not
+assume that a previously full tank is permanently unavailable. Simulation calls
+the handlers in simulation mode without consuming fluid quantity or advancing the
+accepting-destination cursor. Simulations still consume CPU-operation allowance
+and can register ingress demand.
+
+After executed handlers return, `commitDelivery` charges only the accepted amount
+and advances the destination cursor past the actual accepting endpoint. The
+reentrancy guard is cleared in `finally`, including if a provider throws. External
+exporters must honor the actual amount returned by `fill`.
+
+### Terminal extraction and recovery
+
+`extract` checks a loaded source, simulates its offered fluid and simulates the
+route's acceptance. `executeExtraction` then extracts only the agreed quantity and
+routes the actual returned stack. Any amount unexpectedly refused during execution
+is copied into `FluidRecovery`, preserving its original ingress, source and face.
+
+`retryRecovery` first retries network delivery, then tries a budgeted refund into
+the original loaded source. It dirties SavedData when quantities change and removes
+an entry only after its owned contents are empty. Breaking a pipe does not delete
+recovery ownership; restoring a usable ingress or refundable source permits retry.
+This is a safeguard for terminal-owned extraction, not a transactional guarantee
+for arbitrary external handlers or crash-interrupted inventory operations.
+
+### Unload and restart
+
+A queued chunk unload makes routing fail closed before its next topology pass.
+Processing it excludes that chunk and invalidates affected components. Reloads seed
+known neighbors and rescan relevant sections. Level unload releases the dimension
+facade. Pipe topology and caches are rebuilt from blocks after restart, while
+exceptional fluid ownership is restored from dimension SavedData. Do not persist
+component generations as network IDs.
+
 ## Verification
 
 ```sh
@@ -156,3 +227,12 @@ bottleneck, including the terminal, to restore the higher rating. Rates from 1 t
 `Integer.MAX_VALUE` are accepted, matching NeoForge's fluid handler amount range.
 Zero and negative ratings fail construction. Fluid volume changes do not increase
 the number of graph steps or capability attempts allowed per tick.
+
+## Redstone fluid switch
+
+`poweradvantage:fluid_switch` participates as a standard rated pipe while its
+`active` state is true. Redstone power makes it inactive, isolating all faces.
+It uses ordinary block state rather than a block entity. State transitions suspend
+old routes before neighbor notifications and trigger an incremental split or merge.
+Closed valves are not destination endpoints; cached ingress handlers cannot route
+through them. See [PA2 content restoration](pa2-content-port.md) for recipe and API details.

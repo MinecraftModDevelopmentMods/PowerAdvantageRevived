@@ -17,7 +17,7 @@ base {
 java {
     toolchain.languageVersion = JavaLanguageVersion.of(21)
     withSourcesJar()
-    withJavadocJar()
+    //withJavadocJar()
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -26,7 +26,10 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 javadoc {
-    failOnError = false
+    failOnError = true
+    options.memberLevel = JavadocMemberLevel.PRIVATE
+    options.addBooleanOption('Xdoclint:all', true)
+    options.addBooleanOption('Werror', true)
 }
 
 neoForge {

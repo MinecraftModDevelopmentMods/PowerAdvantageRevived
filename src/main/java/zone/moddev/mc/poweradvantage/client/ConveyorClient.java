@@ -18,13 +18,42 @@ import zone.moddev.mc.poweradvantage.blocks.ConveyorBlock;
 import zone.moddev.mc.poweradvantage.conveyor.ConveyorSnapshot;
 import zone.moddev.mc.poweradvantage.conveyor.ConveyorSnapshots;
 
-/** Renders client snapshots directly; no server or client ItemEntities are allocated for belt cargo. */
+/**
+ * Client-only snapshot cache and item-model renderer. The server retains cargo ownership; interpolation never
+ * executes transfers or creates cargo entities.
+ */
 @EventBusSubscriber(modid=PowerAdvantage.MODID,value=Dist.CLIENT)
 public final class ConveyorClient {
+    /**
+     * Creates the stateless client event subscriber; snapshot caches remain shared.
+     */
+    public ConveyorClient() {}
+
+    /**
+     * Completed visible state for one watched chunk, paired with its local receipt tick.
+     *
+     * @param version Server snapshot generation currently visible
+     * @param received Local client tick when the complete snapshot arrived
+     * @param items Immutable visible cargo rendering records
+     */
     private record State(long version,long received,List<ConveyorSnapshot.View> items) {}
+    /**
+     * Completed visible chunk states, never authoritative cargo ownership.
+     */
     private static final Map<Long,State> chunks=new HashMap<>();
+    /**
+     * Assembler rejecting incomplete or stale snapshot replacements.
+     */
     private static final ConveyorSnapshots snapshots=new ConveyorSnapshots();
+    /**
+     * Client-level identity used to clear state across dimension/session changes.
+     */
     private static ClientLevel current;
+    /**
+     * Accepts a same-dimension loaded-chunk fragment and replaces visible state only after complete assembly.
+     *
+     * @param packet chunk snapshot fragment
+     */
     public static void accept(ConveyorSnapshot packet) {
         var level=Minecraft.getInstance().level;
         if(level!=current){clear();current=level;}
@@ -32,11 +61,29 @@ public final class ConveyorClient {
         var chunk=new ChunkPos(packet.chunk());if(!level.getChunkSource().hasChunk(chunk.x,chunk.z))return;
         snapshots.accept(packet).ifPresent(snapshot->chunks.put(snapshot.chunk(),new State(snapshot.version(),level.getGameTime(),snapshot.items())));
     }
+    /**
+     * Drops all client cargo and assembly state when the client level/session changes.
+     */
     private static void clear(){chunks.clear();snapshots.clear();current=null;}
+    /**
+     * Clears cargo snapshots after client disconnect.
+     *
+     * @param event NeoForge registration or lifecycle event
+     */
     @SubscribeEvent public static void logout(ClientPlayerNetworkEvent.LoggingOut event){clear();}
+    /**
+     * Forgets cargo state for an unloaded client chunk.
+     *
+     * @param event NeoForge registration or lifecycle event
+     */
     @SubscribeEvent public static void unload(ChunkEvent.Unload event) {
         if(event.getLevel()==current){long chunk=event.getChunk().getPos().toLong();chunks.remove(chunk);snapshots.forget(chunk);}
     }
+    /**
+     * Draws nearby item models from bounded segment interpolation, with at most 2048 records per frame.
+     *
+     * @param event NeoForge registration or lifecycle event
+     */
     @SubscribeEvent public static void render(RenderLevelStageEvent event) {
         if(event.getStage()!=RenderLevelStageEvent.Stage.AFTER_ENTITIES)return;
         var mc=Minecraft.getInstance();var level=mc.level;

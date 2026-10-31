@@ -1,2 +1,13 @@
 package zone.moddev.mc.poweradvantage.api;
-public enum EnumPipeType { TYPE_FLUID, TYPE_POWER }
+/**
+ * Resource categories understood by the legacy conduit extension interface.
+ */
+public enum EnumPipeType {
+/**
+ * Fluid resource category.
+ */
+TYPE_FLUID,
+/**
+ * Energy resource category.
+ */
+TYPE_POWER }

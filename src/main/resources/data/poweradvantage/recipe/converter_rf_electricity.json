@@ -1,0 +1,29 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "xyz"
+  ],
+  "key": {
+    "x": {
+      "tag": "poweradvantage:power_supply_units"
+    },
+    "y": {
+      "tag": "poweradvantage:steel_frames"
+    },
+    "z": {
+      "item": "minecraft:redstone_block"
+    }
+  },
+  "result": {
+    "id": "poweradvantage:converter_rf_electricity"
+  },
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:not",
+      "value": {
+        "type": "neoforge:tag_empty",
+        "tag": "poweradvantage:power_supply_units"
+      }
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "xxx",
+    "ghg",
+    "xxx"
+  ],
+  "key": {
+    "x": {
+      "tag": "c:plates/steel"
+    },
+    "g": {
+      "tag": "poweradvantage:sprockets"
+    },
+    "h": {
+      "item": "minecraft:hopper"
+    }
+  },
+  "result": {
+    "count": 5,
+    "id": "poweradvantage:item_conveyor"
+  },
+  "group": "conveyors"
+}

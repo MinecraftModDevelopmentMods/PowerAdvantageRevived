@@ -1,0 +1,17 @@
+<screen xmlns="https://moddev.zone/mmdlib/screen"
+        title="block.poweradvantage.still"
+        block-entity="zone.moddev.mc.poweradvantage.tiles.MachineBlockEntity"
+        inventory="none">
+  <vbox padding="8" spacing="5" align="center">
+    <label text="screen.poweradvantage.distiller_input" text-fallback="Input"/>
+    <gauge id="input" orientation="horizontal" length="8s"
+           value="#screenFluid" max="#screenCapacity"
+           tooltip="screen.poweradvantage.fluid_amount"
+           tooltip-fallback="{value} / {max} mB"/>
+    <label text="screen.poweradvantage.distiller_output" text-fallback="Output"/>
+    <gauge id="output" orientation="horizontal" length="8s"
+           value="#screenOutputFluid" max="#screenCapacity"
+           tooltip="screen.poweradvantage.fluid_amount"
+           tooltip-fallback="{value} / {max} mB"/>
+  </vbox>
+</screen>

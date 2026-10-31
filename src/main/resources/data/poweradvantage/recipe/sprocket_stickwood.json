@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " x ",
+    "x/x",
+    " x "
+  ],
+  "key": {
+    "x": {
+      "tag": "c:ingots/steel"
+    },
+    "/": {
+      "tag": "c:rods/wooden"
+    }
+  },
+  "result": {
+    "count": 4,
+    "id": "poweradvantage:sprocket"
+  },
+  "group": "parts",
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:not",
+      "value": {
+        "type": "neoforge:tag_empty",
+        "tag": "c:ingots/steel"
+      }
+    }
+  ]
+}

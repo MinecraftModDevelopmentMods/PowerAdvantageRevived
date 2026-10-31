@@ -40,5 +40,18 @@
   "block.poweradvantage.converter_rf_steam": "Steam-RF Transformer",
   "block.poweradvantage.converter_rf_electricity": "Electricity-RF Transformer",
   "block.poweradvantage.converter_rf_quantum": "Quantum-RF Transformer",
-  "block.poweradvantage.converter_tr_electricity": "Electricity-EU Transformer"
+  "block.poweradvantage.converter_tr_electricity": "Electricity-EU Transformer",
+  "screen.poweradvantage.energy": "Energy",
+  "screen.poweradvantage.fluid": "Fluid",
+  "screen.poweradvantage.distiller_input": "Input",
+  "screen.poweradvantage.distiller_output": "Output",
+  "screen.poweradvantage.energy_amount": "{value} / {max} FE",
+  "screen.poweradvantage.fluid_amount": "{value} / {max} mB",
+  "screen.poweradvantage.filter_samples": "Samples (kept in the filter)",
+  "screen.poweradvantage.filter_cargo": "Item in transit",
+  "screen.poweradvantage.filter_routing": "Matches go down; other items go forward",
+  "screen.poweradvantage.filter_overflow": "Prefers the lower inventory; uses forward output when full",
+  "screen.poweradvantage.converter_fe": "FE / RF",
+  "screen.poweradvantage.converter_electricity": "PA electricity",
+  "screen.poweradvantage.electricity_amount": "{value} / {max} electricity units"
 }

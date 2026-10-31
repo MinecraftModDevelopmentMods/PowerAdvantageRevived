@@ -43,6 +43,11 @@
   "block.poweradvantage.steam": "Steam",
   "item.poweradvantage.steam_bucket": "Steam Bucket",
   "screen.poweradvantage.energy": "Energy",
+  "screen.poweradvantage.fluid": "Fluid",
+  "screen.poweradvantage.distiller_input": "Input",
+  "screen.poweradvantage.distiller_output": "Output",
+  "screen.poweradvantage.energy_amount": "{value} / {max} FE",
+  "screen.poweradvantage.fluid_amount": "{value} / {max} mB",
   "itemGroup.poweradvantage.materials": "Power Advantage",
   "block.poweradvantage.fluid_pipe_terminal": "Fluid Extraction Terminal",
   "message.poweradvantage.pipe_source": "Extract from: %s",
@@ -51,5 +56,12 @@
   "direction.poweradvantage.north": "North",
   "direction.poweradvantage.south": "South",
   "direction.poweradvantage.west": "West",
-  "direction.poweradvantage.east": "East"
+  "direction.poweradvantage.east": "East",
+  "screen.poweradvantage.filter_samples": "Samples (kept in the filter)",
+  "screen.poweradvantage.filter_cargo": "Item in transit",
+  "screen.poweradvantage.filter_routing": "Matches go down; other items go forward",
+  "screen.poweradvantage.filter_overflow": "Prefers the lower inventory; uses forward output when full",
+  "screen.poweradvantage.converter_fe": "FE / RF",
+  "screen.poweradvantage.converter_electricity": "PA electricity",
+  "screen.poweradvantage.electricity_amount": "{value} / {max} electricity units"
 }

@@ -1,0 +1,15 @@
+{
+  "type": "mmdlib:crushing",
+  "ingredient": [
+    {
+      "item": "minecraft:potato"
+    },
+    {
+      "item": "minecraft:poisonous_potato"
+    }
+  ],
+  "result": {
+    "id": "poweradvantage:starch",
+    "count": 1
+  }
+}

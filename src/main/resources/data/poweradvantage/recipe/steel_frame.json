@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "xxx",
+    "x x",
+    "xxx"
+  ],
+  "key": {
+    "x": {
+      "tag": "c:bars/steel"
+    }
+  },
+  "result": {
+    "id": "poweradvantage:steel_frame"
+  },
+  "group": "parts"
+}

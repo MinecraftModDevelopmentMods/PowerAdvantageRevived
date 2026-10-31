@@ -128,6 +128,24 @@ its records, backpressure, pickup, belt removal, persistence and client snapshot
 in the separate `conveyor` package. [Conveyor documentation](conveyor-networks.md)
 records those policies and the downstream extension API.
 
+## Maintaining the incremental pipeline
+
+Network methods are kept small, with helpers named for their responsibilities.
+`TransportNetworks.tick` dispatches chunk handling, component rebuilding and route
+work. Separate helpers handle chunk unload/load, section scanning, node discovery,
+endpoint collection and publication of completed components. `FluidNetworks.route`
+separates admission checks, destination transfers and allowance accounting; actual
+extraction and recovery remain distinct operations.
+
+`RoutingGraph.Builder.advance()` is still the budgeted compression dispatcher.
+Its phase helpers handle validation, classification, component anchoring, entry
+indexing and path construction. A phase helper returns **true when it consumed a
+step**, causing the dispatcher to return false (not yet complete). A helper returns
+false when its phase is finished and the dispatcher may fall through to the next
+phase during the same call. The public dispatcher returns true only on complete
+compression. This distinction preserves the original work accounting while making
+the individual phases easier to follow.
+
 ## Validation
 
 ```sh
