@@ -1,0 +1,22 @@
+{
+  "factory": "poweradvantage:electricity_converter",
+  "template": {
+    "properties": {
+      "hardness": 1.5,
+      "blast_resistance": 6,
+      "requires_correct_tool": true
+    },
+    "tags": [
+      "minecraft:mineable/pickaxe"
+    ],
+    "events": {
+      "block-right-click": "mmdlib:open_menu"
+    }
+  },
+  "part": {
+    "block_entity": {
+      "factory": "poweradvantage:electricity_converter",
+      "factory_data": {}
+    }
+  }
+}

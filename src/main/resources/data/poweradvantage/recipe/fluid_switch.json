@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " l ",
+    "pfp"
+  ],
+  "key": {
+    "l": {
+      "item": "minecraft:lever"
+    },
+    "p": {
+      "tag": "poweradvantage:fluid_pipes"
+    },
+    "f": {
+      "tag": "poweradvantage:steel_frames"
+    }
+  },
+  "result": {
+    "id": "poweradvantage:fluid_switch"
+  },
+  "group": "fluid_machines"
+}

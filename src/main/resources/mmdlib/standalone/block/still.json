@@ -1,0 +1,7 @@
+{
+  "module": "poweradvantage:still",
+  "block_entity_data": {
+    "kind": "DISTILLER",
+    "capacity": 4000
+  }
+}

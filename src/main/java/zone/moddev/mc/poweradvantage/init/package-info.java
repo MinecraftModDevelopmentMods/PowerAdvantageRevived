@@ -1,3 +1,6 @@
+/**
+ * MMDLib implementation factories, deferred content and NeoForge capability registrations.
+ */
 @ParametersAreNonnullByDefault
 @MethodsReturnNonnullByDefault
 package zone.moddev.mc.poweradvantage.init;

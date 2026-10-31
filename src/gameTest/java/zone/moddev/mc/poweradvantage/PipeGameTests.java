@@ -122,7 +122,7 @@ public final class PipeGameTests {
             h.assertTrue(input(h,3,3,Direction.UP).fill(water(1000),FluidAction.EXECUTE)==0,"Loop without endpoints must not absorb fluid");h.succeed();
         });
     }
-    @GameTest(template="empty",timeoutTicks=140)
+    @GameTest(template="empty",timeoutTicks=140,batch="fluid_chunk_boundary")
     public static void chunkBoundarySuspendsAndRecovers(GameTestHelper h) {
         var level=h.getLevel();
         BlockPos origin=h.absolutePos(pos(5,5));
@@ -154,11 +154,17 @@ public final class PipeGameTests {
         var sink=tank(h,3,6);
         for(int x=2;x<=4;x++)pipe(h,x,5);
         var counts=new int[2];
-        for(int delay=20;delay<30;delay++)h.runAfterDelay(delay,()->{
+        // Route discovery is incremental. Warm both ingress caches and register both contenders
+        // before measuring steady-state fairness, without consuming fluid during warmup.
+        for(int delay=20;delay<24;delay++)h.runAfterDelay(delay,()->{
+            input(h,2,5,Direction.WEST).fill(water(1000),FluidAction.SIMULATE);
+            input(h,4,5,Direction.EAST).fill(water(1000),FluidAction.SIMULATE);
+        });
+        for(int delay=24;delay<34;delay++)h.runAfterDelay(delay,()->{
             counts[0]+=input(h,2,5,Direction.WEST).fill(water(1000),FluidAction.EXECUTE);
             counts[1]+=input(h,4,5,Direction.EAST).fill(water(1000),FluidAction.EXECUTE);
         });
-        h.runAfterDelay(35,()->{
+        h.runAfterDelay(39,()->{
             h.assertTrue(counts[0]>0 && counts[1]>0 && Math.abs(counts[0]-counts[1])<=1000,"Earlier tick order must not starve later pusher: "+counts[0]+", "+counts[1]);
             h.assertTrue(sink.fluids.tank(0).getFluidAmount()==counts[0]+counts[1],"Competing pushers must share capacity without duplication");h.succeed();
         });

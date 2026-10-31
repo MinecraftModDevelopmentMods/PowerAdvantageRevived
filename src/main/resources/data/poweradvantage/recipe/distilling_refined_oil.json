@@ -1,0 +1,5 @@
+{
+  "type": "poweradvantage:distilling",
+  "input": { "fluid": "poweradvantage:crude_oil", "amount": 2 },
+  "output": { "id": "poweradvantage:refined_oil", "amount": 1 }
+}

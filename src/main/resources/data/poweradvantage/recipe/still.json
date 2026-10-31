@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "bpb",
+    " f "
+  ],
+  "key": {
+    "b": {
+      "item": "minecraft:bucket"
+    },
+    "p": {
+      "tag": "poweradvantage:fluid_pipes"
+    },
+    "f": {
+      "item": "minecraft:furnace"
+    }
+  },
+  "result": {
+    "id": "poweradvantage:still"
+  },
+  "group": "fluid_machines"
+}

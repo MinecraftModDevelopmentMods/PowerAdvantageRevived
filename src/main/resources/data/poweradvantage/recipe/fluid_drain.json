@@ -1,0 +1,26 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " x ",
+    "w#w",
+    "ppp"
+  ],
+  "key": {
+    "x": {
+      "item": "minecraft:iron_bars"
+    },
+    "w": {
+      "tag": "c:plates/steel"
+    },
+    "#": {
+      "tag": "poweradvantage:steel_frames"
+    },
+    "p": {
+      "tag": "poweradvantage:fluid_pipes"
+    }
+  },
+  "result": {
+    "id": "poweradvantage:fluid_drain"
+  },
+  "group": "fluid_machines"
+}

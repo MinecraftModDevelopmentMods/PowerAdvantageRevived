@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "xxx",
+    "   ",
+    "xxx"
+  ],
+  "key": {
+    "x": {
+      "tag": "c:ingots/iron"
+    }
+  },
+  "result": {
+    "count": 6,
+    "id": "poweradvantage:fluid_pipe"
+  },
+  "group": "pipes"
+}

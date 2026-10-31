@@ -1,0 +1,26 @@
+{
+  "factory": "poweradvantage:item_filter",
+  "template": {
+    "properties": {
+      "hardness": 1.5,
+      "blast_resistance": 6,
+      "requires_correct_tool": true
+    },
+    "tags": [
+      "minecraft:mineable/pickaxe"
+    ],
+    "events": {
+      "block-right-click": "mmdlib:open_menu"
+    }
+  },
+  "part": {
+    "block_entity": {
+      "factory": "poweradvantage:item_filter",
+      "factory_data": {
+        "kind": "BLOCK",
+        "interval": 8,
+        "batch": 16
+      }
+    }
+  }
+}

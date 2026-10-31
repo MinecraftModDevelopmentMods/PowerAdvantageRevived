@@ -1,14 +1,14 @@
 {
   "parent": "block/block",
   "textures": {
-        "top": "blocks/furnace_top",
-        "front": "blocks/furnace_front_on",
-        "side": "blocks/furnace_side",
+        "top": "minecraft:block/furnace_top",
+        "front": "minecraft:block/furnace_front_on",
+        "side": "minecraft:block/furnace_side",
         "tank": "poweradvantage:block/materials/steel",
         "particle": "poweradvantage:block/materials/steel"
     },
     "elements": [
-        {   
+        {
             "from": [ 0, 0, 0 ],
             "to":   [16, 8,16 ],
             "faces": {
@@ -19,7 +19,7 @@
                 "up":    { "uv": [ 0, 0,16,16 ], "texture": "#top" },
                 "down":  { "uv": [ 0, 0,16,16 ], "texture": "#top",  "cullface": "down"  }
             }
-        },{   
+        },{
             "from": [ 9, 8, 2 ],
             "to": [ 15, 16, 6 ],
             "faces": {
@@ -29,7 +29,7 @@
                 "west":  { "uv": [14, 8,10,16 ], "texture": "#tank"},
                 "up":    { "uv": [ 9, 2,15, 6 ], "texture": "#tank", "cullface": "up"  }
             }
-        },{   
+        },{
             "from": [ 10, 8, 1 ],
             "to": [ 14, 16, 7 ],
             "faces": {
@@ -39,7 +39,7 @@
                 "west":  { "uv": [15, 8, 9,16 ], "texture": "#tank"},
                 "up":    { "uv": [10, 1,14, 7 ], "texture": "#tank", "cullface": "up"  }
             }
-        },{   
+        },{
             "from": [ 1, 8,10 ],
             "to": [ 7, 16,14 ],
             "faces": {
@@ -49,7 +49,7 @@
                 "west":  { "uv": [ 6, 8, 2,16 ], "texture": "#tank"},
                 "up":    { "uv": [ 1,10, 7,14 ], "texture": "#tank", "cullface": "up"  }
             }
-        },{   
+        },{
             "from": [ 2, 8, 9 ],
             "to": [ 6, 16,15 ],
             "faces": {

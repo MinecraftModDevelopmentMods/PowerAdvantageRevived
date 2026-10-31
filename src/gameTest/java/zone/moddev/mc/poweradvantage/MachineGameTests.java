@@ -116,4 +116,21 @@ public final class MachineGameTests {
         });
     }
 
+    @GameTest(template = "empty")
+    public static void distillerConvertsCrudeToRefined(GameTestHelper h) {
+        var recipe = zone.moddev.mc.poweradvantage.api.distillation.DistillingRecipe.find(h.getLevel(),
+            new FluidStack(zone.moddev.mc.poweradvantage.init.Fluids.CRUDE_OIL.get(), 2));
+        h.assertTrue(recipe.isPresent() && recipe.get().value().input().amount() == 2 && recipe.get().value().output().getAmount() == 1
+            && recipe.get().value().output().getFluid() == zone.moddev.mc.poweradvantage.init.Fluids.REFINED_OIL.get(), "Default 2:1 data recipe");
+        var still = place(h, "still", new BlockPos(2,2,2));
+        h.assertTrue(still.fluids.fill(new FluidStack(Fluids.WATER, 1000), FluidAction.EXECUTE) == 0, "Input filter");
+        h.assertTrue(still.fluids.fill(new FluidStack(zone.moddev.mc.poweradvantage.init.Fluids.CRUDE_OIL.get(), 1000), FluidAction.EXECUTE) == 1000, "Crude accepted");
+        MachineBlockEntity.serverTick(h.getLevel(), still.getBlockPos(), still.getBlockState(), still);
+        h.assertTrue(still.fluids.tank(0).getFluidAmount() == 998 && still.fluids.tank(1).isEmpty(), "Input consumed at start, output pending");
+        MachineBlockEntity.serverTick(h.getLevel(), still.getBlockPos(), still.getBlockState(), still);
+        h.assertTrue(still.fluids.tank(1).getFluidAmount() == 1, "2:1 recipe finishes in 2 ticks");
+        h.assertTrue(new zone.moddev.mc.poweradvantage.api.distillation.DistillingRecipe(net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient.of(Fluids.WATER, 10), new FluidStack(Fluids.LAVA, 2), java.util.Optional.empty()).duration() == 5, "10:2 takes 5 ticks");
+        h.assertTrue(still.fluids.tank(1).getFluid().getFluid() == zone.moddev.mc.poweradvantage.init.Fluids.REFINED_OIL.get(), "Refined output");
+        h.succeed();
+    }
 }

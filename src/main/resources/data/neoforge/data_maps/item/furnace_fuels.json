@@ -1,0 +1,16 @@
+{
+  "values": {
+    "poweradvantage:bucket_crude_oil": {
+      "burn_time": 5000
+    },
+    "poweradvantage:bucket_refined_oil": {
+      "burn_time": 25000
+    },
+    "#c:dusts/coal": {
+      "burn_time": 1600
+    },
+    "#c:dusts/carbon": {
+      "burn_time": 1600
+    }
+  }
+}

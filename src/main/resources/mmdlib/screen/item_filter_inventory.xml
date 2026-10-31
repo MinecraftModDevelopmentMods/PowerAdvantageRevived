@@ -1,0 +1,11 @@
+<screen xmlns="https://moddev.zone/mmdlib/screen"
+        title="block.poweradvantage.item_filter_inventory"
+        block-entity="zone.moddev.mc.poweradvantage.filter.FilterBlockEntity">
+  <vbox padding="8" spacing="5" align="center">
+    <label text="screen.poweradvantage.filter_cargo" text-fallback="Item in transit"/>
+    <slot index="0"/>
+    <label text="screen.poweradvantage.filter_samples" text-fallback="Samples (kept in the filter)"/>
+    <hbox spacing="0"><slot index="1"/><slot index="2"/><slot index="3"/><slot index="4"/><slot index="5"/><slot index="6"/><slot index="7"/><slot index="8"/><slot index="9"/></hbox>
+    <label text="screen.poweradvantage.filter_routing" text-fallback="Matches go down; other items go forward"/>
+  </vbox>
+</screen>
