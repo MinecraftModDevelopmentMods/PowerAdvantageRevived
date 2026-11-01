@@ -32,6 +32,13 @@ description='''${mod_description}'''
     side="BOTH"
 
 [[dependencies.${mod_id}]]
+    modId="orespawn"
+    type="required"
+    versionRange="${orespawn_version_range}"
+    ordering="NONE"
+    side="BOTH"
+
+[[dependencies.${mod_id}]]
     modId="basemetals"
     type="optional"
     versionRange="[0,)"

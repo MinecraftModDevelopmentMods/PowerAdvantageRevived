@@ -133,4 +133,18 @@ public final class MachineGameTests {
         h.assertTrue(still.fluids.tank(1).getFluid().getFluid() == zone.moddev.mc.poweradvantage.init.Fluids.REFINED_OIL.get(), "Refined output");
         h.succeed();
     }
+
+    @GameTest(template = "empty")
+    public static void distillerAcceptsCommonCrudeOilTags(GameTestHelper h) {
+        var crude = new FluidStack(zone.moddev.mc.poweradvantage.init.Fluids.CRUDE_OIL.get(), 1);
+        for (var tag : new String[]{"crude_oil", "oils/crude"})
+            h.assertTrue(crude.is(net.minecraft.tags.TagKey.create(net.minecraft.core.registries.Registries.FLUID, net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("c", tag))), "PA crude oil must be in c:" + tag);
+        // GameTest data shadows c:oils/crude (same pack), repeating PA crude oil and adding lava as another mod's oil.
+        var still = place(h, "still", new BlockPos(2,2,2));
+        h.assertTrue(still.fluids.fill(new FluidStack(Fluids.LAVA, 1000), FluidAction.EXECUTE) == 1000, "Tagged foreign crude oil accepted");
+        MachineBlockEntity.serverTick(h.getLevel(), still.getBlockPos(), still.getBlockState(), still);
+        MachineBlockEntity.serverTick(h.getLevel(), still.getBlockPos(), still.getBlockState(), still);
+        h.assertTrue(still.fluids.tank(1).getFluid().getFluid() == zone.moddev.mc.poweradvantage.init.Fluids.REFINED_OIL.get(), "Tagged foreign crude oil distills to refined oil");
+        h.succeed();
+    }
 }

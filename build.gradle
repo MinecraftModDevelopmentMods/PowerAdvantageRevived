@@ -83,6 +83,7 @@ repositories {
 
 dependencies {
     implementation files("libs/mmdlib-${mmdlib_version}.jar")
+    runtimeOnly "zone.moddev.mc.orespawn:OreSpawn:${orespawn_version}"
 }
 
 def generateModMetadata = tasks.register('generateModMetadata', ProcessResources) {
@@ -99,6 +100,7 @@ def generateModMetadata = tasks.register('generateModMetadata', ProcessResources
         mod_authors            : mod_authors,
         mod_description        : mod_description,
         mmdlib_version_range   : mmdlib_version_range,
+        orespawn_version_range : orespawn_version_range,
     ]
     inputs.properties replaceProperties
     expand replaceProperties

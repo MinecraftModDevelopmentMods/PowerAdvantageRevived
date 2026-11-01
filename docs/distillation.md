@@ -19,11 +19,13 @@ Files go in `data/<namespace>/recipe/<name>.json`:
 
 | Field    | Required | Meaning |
 |----------|----------|---------|
-| `input`  | yes      | A sized fluid ingredient: `fluid` (a fluid id) or `tag` (a fluid tag), plus `amount` in mB consumed per operation. |
+| `input`  | yes      | A sized fluid ingredient: `fluid` (a fluid id), `tag` (a fluid tag) or a `neoforge:compound` of `children`, plus `amount` in mB consumed per operation. |
 | `output` | yes      | A fluid stack: `id` and `amount` in mB produced per operation. |
 | `ticks`  | no       | Operation duration in ticks, at least 1. Overrides the automatic duration below. |
 
-The built-in recipe is `poweradvantage:distilling_refined_oil` (2 crude oil to 1 refined oil). Override it by shipping a
+The built-in recipe is `poweradvantage:distilling_refined_oil` (2 crude oil to 1 refined oil). Its input is any fluid
+in the common `c:crude_oil` or `c:oils/crude` tags; PA crude oil is in both, so other mods' crude oils that use either
+tag distill without any configuration. Override it by shipping a
 recipe with the same id in a data pack, or remove it with a recipe-removal mod such as KubeJS or CraftTweaker.
 
 ## Behaviour

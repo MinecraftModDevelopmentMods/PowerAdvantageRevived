@@ -59,3 +59,12 @@ bridges to distinct power models. The electrical boundary is available through t
 dependent-mod integration and a migration strategy. Quantum and Tech Reborn
 converter ports are explicitly out of scope; see [the legacy power audit](legacy-power-audit.md). The PA2 reference tree remains available while this
 work is pending.
+
+## Crude oil deposits
+
+As in PA2, OreSpawn generates crude oil. PA3 requires OreSpawn 4 and contributes
+the `poweradvantage:fluid_deposit/desert_crude_oil` deposit through
+`data/poweradvantage/orespawn/provider.json`. Deposits generate in the Overworld
+in sandy biomes, excluding beaches and badlands, between y 0 and 48 inside
+stone. Pack makers can override the provider with
+`config/poweradvantage-orespawn.json` (see OreSpawn's provider documentation).

@@ -64,6 +64,23 @@ unless noted.
 - [ ] `BaseMetalsCompat`: specific compatibility, carbon-dust alias fallback and global hammer-config
   mutation remain deferred per maintainer direction. Potato crushing and fuel registrations already use
   public MMDLib/NeoForge data APIs. Legacy recipe-mode condition factories are intentionally dropped.
+- [x] Chest loot: `poweradvantage:chests/treasure` reproduces the PA2 pool (25% chance of sprockets, pipes, a storage tank,
+  drain, discharge or conveyors) and the `chest_treasure` global loot modifier adds it to mineshaft, dungeon, stronghold
+  corridor/crossing and village toolsmith/weaponsmith/armorer chests (PA2's single blacksmith chest). The
+  `treasure_chest_loot_factor` config is not ported; pack makers adjust or remove the table through data packs.
+- [x] Villager trades: novice toolsmiths sell 1-4 sprockets and novice farmers sell 4-8 bioplastic for one emerald.
+  Two thirds of newly spawned wandering traders also carry one of these offers (`Trades.WANDERER_CHANCE`).
+- [x] Crude oil world generation: OreSpawn 4 (now a required dependency) places the deposits from
+  `data/poweradvantage/orespawn/provider.json`, the same provider the PA2 ports ship (`forge:stone` became
+  `c:stones`). Overworld, sandy non-beach non-badlands biomes, y 0-48, frequency 0.08 per chunk.
+  - Constraint: a default deposit (including adjacent pockets that merge) must stay well under 10,000 connected source
+    blocks. EA3's electric pump can be configured to treat larger bodies as effectively infinite and pump without
+    consuming sources. OreSpawn clips each deposit to its origin chunk; a simulation of these defaults over ~82k
+    all-sandy chunks gave a largest connected body of ~4,100 blocks (p99 ~2,300). Keep any new defaults at or below
+    these sizes.
+- [x] Accept other mods' oils (PA2 `use_other_fluids`): PA crude oil is in the common `c:crude_oil` and `c:oils/crude`
+  fluid tags, and the default distilling recipe accepts either tag, so no flag is needed.
+  - [ ] Confirm which tags PneumaticCraft and Oritech (both `oil` and `heavy oil`) actually use.
 - [x] Verify textures that PA2 has: `fluid_switch_on/off`, `powercable`, `techreborn_converter`, `metal_panel`.
   All are present at canonical `textures/block` paths and byte-identical to PA2. The TR asset remains reference-only.
 
@@ -84,6 +101,11 @@ unless noted.
 - Distilling uses modern JSON recipes and pack scripting; no separate legacy distilling-config mechanism.
 - BaseMetals 3.0 and its matching Modern Metals are standalone. Real MMDLib integration is deferred until
   a future MMDLib-based branch (potentially 4.0); ordinary shared-tag recipe compatibility remains usable.
+- `LightWeightPowerRegistry` and the PA2 external-power-acceptor API are dropped as surplus; they mainly distinguished
+  power connector types that shared a model. Dependent mods use NeoForge capabilities.
+- The PA2 high-res resource pack is not ported; a new texture set to replace the dated originals is being sought.
+- The lead pipe (apocalyptic recipe mode only) is dropped. The bronze sprocket is expected from a new MMDLib 2.0-based
+  BaseMetals branch rather than from PA3.
 - Retain the PA2 reference tree and unregistered legacy assets while the remaining port work is pending.
 
 ## Done in this port
