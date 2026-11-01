@@ -205,6 +205,21 @@ public final class ConveyorGameTests {
             h.succeed();
         });
     }
+    @GameTest(template="empty")
+    public static void sideFedBeltRendersAsCorner(GameTestHelper h) {
+        belt(h,4,"item_conveyor");
+        h.setBlock(new BlockPos(4,3,4),BuiltInRegistries.BLOCK.get(ModContent.id("item_conveyor")).defaultBlockState().setValue(ConveyorBlock.FACING,Direction.SOUTH));
+        h.assertBlockProperty(p(4),ConveyorBlock.SHAPE,ConveyorBlock.Shape.LEFT);
+        belt(h,3,"item_conveyor");
+        h.assertBlockProperty(p(4),ConveyorBlock.SHAPE,ConveyorBlock.Shape.STRAIGHT);
+        h.setBlock(p(3),Blocks.BARREL);
+        h.assertBlockProperty(p(4),ConveyorBlock.SHAPE,ConveyorBlock.Shape.STRAIGHT);
+        h.setBlock(p(3),Blocks.AIR);
+        h.assertBlockProperty(p(4),ConveyorBlock.SHAPE,ConveyorBlock.Shape.LEFT);
+        h.setBlock(new BlockPos(4,3,6),BuiltInRegistries.BLOCK.get(ModContent.id("item_conveyor")).defaultBlockState().setValue(ConveyorBlock.FACING,Direction.NORTH));
+        h.assertBlockProperty(p(4),ConveyorBlock.SHAPE,ConveyorBlock.Shape.STRAIGHT);
+        h.succeed();
+    }
     @GameTest(template="empty",timeoutTicks=100)
     public static void partialDeliveryKeepsRemainderOnBelt(GameTestHelper h) {
         belt(h,4,"item_conveyor");var target=barrel(h,5);

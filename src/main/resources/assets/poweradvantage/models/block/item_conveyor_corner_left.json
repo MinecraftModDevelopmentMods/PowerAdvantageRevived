@@ -1,0 +1,10 @@
+{
+    "parent": "poweradvantage:block/conveyor_corner_left_base",
+    "textures": {
+        "top": "poweradvantage:block/item_conveyor_top",
+        "bottom": "poweradvantage:block/item_conveyor_top",
+        "side": "poweradvantage:block/item_conveyor_side",
+        "end": "poweradvantage:block/item_conveyor_end",
+        "rim": "poweradvantage:block/materials/steel"
+    }
+}

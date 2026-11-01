@@ -3,6 +3,7 @@ package zone.moddev.mc.poweradvantage.blocks;
 import java.util.*;
 import net.minecraft.core.*;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.*;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.item.ItemEntity;
@@ -28,6 +29,17 @@ public class ConveyorBlock extends Block {
      * Horizontal output direction persisted in ordinary block state.
      */
     public static final DirectionProperty FACING=BlockStateProperties.HORIZONTAL_FACING;
+    /**
+     * Purely visual belt form, derived from which neighbouring belts feed this segment.
+     */
+    public static final EnumProperty<Shape> SHAPE=EnumProperty.create("shape",Shape.class);
+    /**
+     * Rendered belt form; left and right name the side, relative to the output direction, that feeds a corner.
+     */
+    public enum Shape implements StringRepresentable {
+        STRAIGHT,LEFT,RIGHT;
+        @Override public String getSerializedName(){return name().toLowerCase(Locale.ROOT);}
+    }
     /**
      * Default eight processed ticks required per belt segment.
      * Default per-segment ceiling of sixteen arriving/departing items per tick.
@@ -56,7 +68,7 @@ public class ConveyorBlock extends Block {
         super(properties.noOcclusion());
         if(travelTicks<=0||itemsPerTick<=0)throw new IllegalArgumentException("Conveyor rates must be positive");
         this.travelTicks=travelTicks;this.itemsPerTick=itemsPerTick;
-        registerDefaultState(stateDefinition.any().setValue(FACING,Direction.NORTH));
+        registerDefaultState(stateDefinition.any().setValue(FACING,Direction.NORTH).setValue(SHAPE,Shape.STRAIGHT));
     }
     /**
      * Returns the immutable segment travel duration.
@@ -189,14 +201,58 @@ public class ConveyorBlock extends Block {
      *
      * @param builder block-state definition builder
      */
-    @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block,BlockState> builder){builder.add(FACING);}
+    @Override protected void createBlockStateDefinition(StateDefinition.Builder<Block,BlockState> builder){builder.add(FACING,SHAPE);}
+    /**
+     * Picks the rendered form: a corner when exactly one side belt feeds in and nothing occupies the back, which stays
+     * straight for a feeding belt or a block-entity source behind it.
+     *
+     * @param level world or region view holding the neighbours
+     * @param pos block position being queried or changed
+     * @param facing output direction of this segment
+     * @return visual belt form
+     */
+    protected Shape shapeFor(BlockGetter level,BlockPos pos,Direction facing) {
+        var back=facing.getOpposite();
+        if(feeds(level,pos,back)||level.getBlockEntity(pos.relative(back))!=null)return Shape.STRAIGHT;
+        boolean left=feeds(level,pos,facing.getCounterClockWise()),right=feeds(level,pos,facing.getClockWise());
+        return left==right?Shape.STRAIGHT:left?Shape.LEFT:Shape.RIGHT;
+    }
+    /**
+     * Tests whether the belt on the given side outputs into this position.
+     *
+     * @param level world or region view holding the neighbours
+     * @param pos block position being queried or changed
+     * @param side direction from this segment to the neighbour
+     * @return true if that neighbour is a belt facing this segment
+     */
+    private static boolean feeds(BlockGetter level,BlockPos pos,Direction side) {
+        var other=level.getBlockState(pos.relative(side));
+        return other.getBlock() instanceof ConveyorBlock&&other.getValue(FACING)==side.getOpposite();
+    }
+    /**
+     * Refreshes the rendered form when a horizontal neighbour changes.
+     *
+     * @param state current block state
+     * @param side direction of the changed neighbour
+     * @param neighbour new neighbour state
+     * @param level world or region view holding the neighbours
+     * @param pos block position being queried or changed
+     * @param from changed neighbour position
+     * @return state with an updated shape
+     */
+    @Override protected BlockState updateShape(BlockState state,Direction side,BlockState neighbour,LevelAccessor level,BlockPos pos,BlockPos from) {
+        return side.getAxis().isHorizontal()?state.setValue(SHAPE,shapeFor(level,pos,state.getValue(FACING))):state;
+    }
     /**
      * Creates the initial state from player placement context.
      *
      * @param context player placement and clicked-face context
      * @return initial placed block state
      */
-    @Override public BlockState getStateForPlacement(BlockPlaceContext context){return defaultBlockState().setValue(FACING,context.getHorizontalDirection());}
+    @Override public BlockState getStateForPlacement(BlockPlaceContext context) {
+        var facing=context.getHorizontalDirection();
+        return defaultBlockState().setValue(FACING,facing).setValue(SHAPE,shapeFor(context.getLevel(),context.getClickedPos(),facing));
+    }
     /**
      * Transforms directional properties under a structure rotation.
      *
@@ -212,7 +268,11 @@ public class ConveyorBlock extends Block {
      * @param mirror structure mirror to apply
      * @return mirrored block state
      */
-    @Override protected BlockState mirror(BlockState state,Mirror mirror){return rotate(state,mirror.getRotation(state.getValue(FACING)));}
+    @Override protected BlockState mirror(BlockState state,Mirror mirror) {
+        var result=rotate(state,mirror.getRotation(state.getValue(FACING)));
+        return mirror==Mirror.NONE?result:result.setValue(SHAPE,switch(state.getValue(SHAPE)){
+            case LEFT->Shape.RIGHT;case RIGHT->Shape.LEFT;case STRAIGHT->Shape.STRAIGHT;});
+    }
     /**
      * Returns the collision/selection geometry for the current state.
      *
