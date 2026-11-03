@@ -37,7 +37,12 @@ public class ConveyorBlock extends Block {
      * Rendered belt form; left and right name the side, relative to the output direction, that feeds a corner.
      */
     public enum Shape implements StringRepresentable {
-        STRAIGHT,LEFT,RIGHT;
+        /** Fed from behind, or from both sides or neither, so the belt runs straight. */
+        STRAIGHT,
+        /** Fed only from the left of the output direction. */
+        LEFT,
+        /** Fed only from the right of the output direction. */
+        RIGHT;
         @Override public String getSerializedName(){return name().toLowerCase(Locale.ROOT);}
     }
     /**

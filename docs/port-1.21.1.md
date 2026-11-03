@@ -1,14 +1,13 @@
 # Power Advantage on NeoForge 1.21.1
 
-Requires Java 21, NeoForge 21.1.265, and the MMDLib 2.0 alpha API with
+Requires Java 21, NeoForge 21.1.265, and the MMDLib 2.0 API with
 `StandaloneBlock.blockEntityData`, `BlockContext.blockEntity`, and
 `RuntimeContentRegistrar.blockEntityTypes`.
 
-The build uses `libs/mmdlib-2.0.0-alpha.jar` directly so an older Maven-local
-artifact cannot silently replace it. This copy came from the adjacent
-`MMDLib-2.x/build/libs/mmdlib-2.0.0-alpha-all.jar`; the `-all` distribution
-includes MMDLib's nested dependencies. MMDLib remains a separate required mod
-when installing the built Power Advantage JAR. `libs/` is ignored by Git.
+MMDLib comes from `maven.moddev.zone` as `zone.moddev.mc.lib:mmdlib:2.0.+`,
+restricted to the `+Neo` builds. Maven-local is excluded for that group so an
+older local build cannot silently replace the published one. MMDLib remains a
+separate required mod when installing the built Power Advantage JAR.
 
 ## Content and implementation
 

@@ -1,23 +1,24 @@
 plugins {
     id 'java-library'
+    id 'eclipse'
+    id 'idea'
     id 'maven-publish'
-    id 'net.neoforged.moddev' version "${moddevgradle_version}"
+    id 'net.neoforged.moddev' version '2.0.148'
 }
 
-version = "${minecraft_version}-${mod_version}"
-if (System.getenv('BUILD_NUMBER')) {
-    version += '.' + System.getenv('BUILD_NUMBER')
-}
-group = mod_group_id
+def env = System.getenv()
+def tag = providers.environmentVariable('TAG')
+version = tag.orElse("${mod_version}-development").get()
+group = mod_group
 
 base {
-    archivesName = 'PowerAdvantage'
+    archivesName = mod_archive_name
 }
 
 java {
     toolchain.languageVersion = JavaLanguageVersion.of(21)
     withSourcesJar()
-    //withJavadocJar()
+    withJavadocJar()
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -33,7 +34,12 @@ javadoc {
 }
 
 neoForge {
-    version = project.neo_version
+    version = neoforge_version
+
+    parchment {
+        minecraftVersion = parchment_minecraft_version
+        mappingsVersion = parchment_mappings_version
+    }
 
     runs {
         client {
@@ -52,6 +58,7 @@ neoForge {
                 '--existing', file('src/main/resources/').getAbsolutePath()
         }
         configureEach {
+            gameDirectory = file('run')
             systemProperty 'forge.logging.markers', 'REGISTRIES'
             logLevel = org.slf4j.event.Level.DEBUG
         }
@@ -67,7 +74,13 @@ neoForge {
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 repositories {
-    mavenLocal()
+    mavenCentral()
+    mavenLocal {
+        // A stale local MMDLib build must not shadow the published one
+        content {
+            excludeGroup 'zone.moddev.mc.lib'
+        }
+    }
     maven {
         name = 'ModDevZone'
         url = uri('https://maven.moddev.zone/releases')
@@ -75,30 +88,38 @@ repositories {
             includeGroupByRegex 'zone\\.moddev\\.mc.*'
         }
     }
-    // MMDLib 2.0 is not published yet; it lives in libs/ until it is
-    flatDir {
-        dirs 'libs'
+}
+
+// MMDLib publishes every loader under one artifact, distinguished by a '+<Loader>' version suffix
+configurations.configureEach {
+    resolutionStrategy.componentSelection.all { ComponentSelection selection ->
+        def candidate = selection.candidate
+        if (candidate.group == 'zone.moddev.mc.lib' && candidate.module == 'mmdlib' && !candidate.version.endsWith('+Neo')) {
+            selection.reject('not a NeoForge build of MMDLib')
+        }
     }
 }
 
 dependencies {
-    implementation files("libs/mmdlib-${mmdlib_version}.jar")
+    implementation "zone.moddev.mc.lib:mmdlib:${mmdlib_version}"
     runtimeOnly "zone.moddev.mc.orespawn:OreSpawn:${orespawn_version}"
 }
 
+// Kept as a separate task (rather than expanding in processResources) so IDE runs see the metadata too
 def generateModMetadata = tasks.register('generateModMetadata', ProcessResources) {
     def replaceProperties = [
-        minecraft_version      : minecraft_version,
         minecraft_version_range: minecraft_version_range,
-        neo_version            : neo_version,
-        neo_version_range      : neo_version_range,
+        neoforge_version_range : neoforge_version_range,
         loader_version_range   : loader_version_range,
         mod_id                 : mod_id,
         mod_name               : mod_name,
         mod_license            : mod_license,
-        mod_version            : mod_version,
+        mod_version            : project.version,
         mod_authors            : mod_authors,
         mod_description        : mod_description,
+        curseforge_url         : curseforge_id ? "https://www.curseforge.com/projects/${curseforge_id}" : homepage_url,
+        issue_url              : issue_url,
+        update_url             : update_url,
         mmdlib_version_range   : mmdlib_version_range,
         orespawn_version_range : orespawn_version_range,
     ]
@@ -110,39 +131,36 @@ def generateModMetadata = tasks.register('generateModMetadata', ProcessResources
 sourceSets.main.resources.srcDir generateModMetadata
 neoForge.ideSyncTask generateModMetadata
 
-class Secrets {
-    def data = null
-
-    def getProperty(String key) {
-        return data ? data[key] : ''
-    }
-}
-
-def secret = new Secrets()
-def secretFile = file(System.getenv('SECRET_FILE') ?: 'secret.json')
-if (secretFile.exists()) {
-    secretFile.withReader {
-        secret.data = new groovy.json.JsonSlurper().parse it
-    }
-}
-
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            artifactId = base.archivesName.get()
+            artifactId = mod_archive_name
             from components.java
         }
     }
     repositories {
-        if (secret.data) {
+        if (env.MAVEN_UPLOAD_URL) {
             maven {
+                url = uri(env.MAVEN_UPLOAD_URL)
                 credentials {
-                    username = secret.username
-                    password = secret.password
+                    username = env.MAVEN_UPLOAD_USERNAME
+                    password = env.MAVEN_UPLOAD_PASSWORD
                 }
-                url = secret.url
             }
         }
+    }
+}
+
+idea {
+    module {
+        downloadSources = true
+    }
+}
+
+eclipse {
+    classpath {
+        downloadJavadoc = true
+        downloadSources = true
     }
 }
 
