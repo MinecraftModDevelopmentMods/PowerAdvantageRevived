@@ -1,0 +1,69 @@
+
+Vanilla-style 16x assets for Power Advantage
+
+==============================================================================
+LICENSE
+==============================================================================
+
+This mod does NOT have a single license:
+
+  - The mod's code and the textures drawn for this pack are licensed under
+    the GNU Lesser General Public License, version 2.1 (LGPL 2.1):
+       https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+    These textures belong to Minecraft Mod Development group. No file in
+    this pack contains futureazoo's artwork.
+  - NOT covered by LGPL 2.1: three textures are unchanged Minecraft
+    textures and remain the property of Mojang Studios, as do textures based
+    on vanilla shapes (see "Other material").
+
+==============================================================================
+FUTUREAZOO - ACKNOWLEDGEMENT (palette and style only)
+==============================================================================
+
+Artist:  futureazoo
+Source:  TextureRepository, https://github.com/Futureazoo/TextureRepository
+         (folder: futureazoo/)
+
+Colours and style in this pack were taken from futureazoo's work:
+  - Iron ramp (353535 to e5e5e5), sampled from futureazoo's iron machine set.
+  - Durasteel ramp (525660 to e9eaec), sampled from the durasteel set.
+  - Brass ramp (6b4e00 to f3d174), sampled from the bronze machine set.
+  - The plate style - dark 1px outline, top-left highlight, brushed rows,
+    corner rivets - follows futureazoo's machine plates.
+
+Used in every texture in this pack except block/materials/plastic, block/materials/stone,
+block/materials/stone_brick, block/materials/wood, the infinite sources and the
+items: the machine panels,
+item filters, fluid drain, discharge, tank, pipe and valve, conveyor, steel
+frame, TechReborn converter, and the steel, steel_dark, iron, invar, brass,
+copper and metal_panel materials.
+
+This is a thank-you credit. These textures were drawn for this pack and
+contain none of futureazoo's artwork, so futureazoo's CC BY-NC-SA 4.0 license
+does not apply to them; they are LGPL 2.1 like the rest of this pack.
+
+==============================================================================
+OTHER MATERIAL
+==============================================================================
+
+Minecraft (Mojang Studios) - not Minecraft Mod Development group's:
+  - block/materials/stone.png, block/materials/stone_brick.png and block/materials/wood.png are
+    the vanilla stone, stone_bricks and oak_planks textures, unchanged.
+  - item/bucket_crude_oil.png and item/bucket_refined_oil.png use the vanilla
+    lava bucket's pixel layout with new colours.
+  - item/bioplastic_ingot.png uses the vanilla iron ingot shape with new
+    colours.
+  - item/starch.png follows the shape of vanilla sugar.
+  - Some colours were sampled from vanilla textures.
+
+Drawn for this pack (Minecraft Mod Development group; LGPL 2.1), besides the
+textures above: block/infinite_power.png, block/infinite_steam.png and
+block/infinite_quantum.png (sandbox-style purple sources), and the conveyor belt
+(block/item_conveyor_top.png). The infinite_electricity, infinite_steam and
+infinite_quantum block models were changed to use the new infinite textures.
+
+Power Advantage is a mod by DrCyano. The sprocket item is the mod's original
+texture and is not included in this pack.
+
+This pack is not affiliated with or endorsed by Mojang Studios, Microsoft,
+DrCyano or futureazoo.
