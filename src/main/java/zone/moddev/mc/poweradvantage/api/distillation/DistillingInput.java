@@ -8,7 +8,9 @@ import net.neoforged.neoforge.fluids.FluidStack;
  * Recipe input carrying the fluid currently held by a Distillery's input tank.
  *
  * @param fluid offered fluid stack
+ * @deprecated Part of the {@link DistillingRecipe} compatibility view; see there.
  */
+@Deprecated
 public record DistillingInput(FluidStack fluid) implements RecipeInput {
     /**
      * Distillery recipes have no item slots.

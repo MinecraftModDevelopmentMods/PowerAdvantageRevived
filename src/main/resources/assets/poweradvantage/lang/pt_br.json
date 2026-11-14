@@ -54,5 +54,7 @@
   "screen.poweradvantage.converter_electricity": "Eletricidade PA",
   "screen.poweradvantage.electricity_amount": "{value} / {max} unidades de eletricidade",
   "screen.poweradvantage.redstone.fill_level": "Nível de enchimento",
-  "screen.poweradvantage.redstone.fill_level.description": "A intensidade do sinal acompanha o quanto o tanque está cheio"
+  "screen.poweradvantage.redstone.fill_level.description": "A intensidade do sinal acompanha o quanto o tanque está cheio",
+  "item.poweradvantage.fluid_intake_pump": "Bomba de admissão de fluidos",
+  "item.poweradvantage.fluid_output_pump": "Bomba de saída de fluidos"
 }

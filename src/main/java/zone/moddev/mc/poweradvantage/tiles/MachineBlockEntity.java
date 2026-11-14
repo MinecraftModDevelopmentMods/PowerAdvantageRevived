@@ -10,9 +10,6 @@ import net.neoforged.neoforge.items.IItemHandlerModifiable;
 import net.neoforged.neoforge.items.ItemStackHandler;
 import zone.moddev.mc.lib.api.capabilities.*;
 import zone.moddev.mc.lib.gui.runtime.ScreenHost;
-import net.neoforged.neoforge.fluids.capability.IFluidHandler;
-import zone.moddev.mc.poweradvantage.api.distillation.DistillingRecipe;
-import zone.moddev.mc.poweradvantage.blocks.DistillerBlock;
 import zone.moddev.mc.poweradvantage.init.Fluids;
 import zone.moddev.mc.poweradvantage.util.WorldFluids;
 import static zone.moddev.mc.poweradvantage.tiles.MachineSettings.Kind.*;
@@ -43,14 +40,6 @@ public final class MachineBlockEntity extends BlockEntity implements ScreenHost 
      */
     private int workTicks;
     /**
-     * Ticks remaining in the running Distillery operation, whose input was already consumed; zero when idle.
-     */
-    private int progress;
-    /**
-     * Output of the running Distillery operation, produced when the timer ends; empty when idle.
-     */
-    private FluidStack pendingOutput = FluidStack.EMPTY;
-    /**
      * Last neighbor-notified tank redstone strength.
      */
     private int lastSignal;
@@ -66,13 +55,8 @@ public final class MachineBlockEntity extends BlockEntity implements ScreenHost 
     public MachineBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state, MachineSettings settings) {
         super(type, pos, state);
         this.settings = settings;
-        if (settings.kind() == DISTILLER) {
-            fluids.addTank(settings.capacity(), Role.INPUT, stack -> level == null || DistillingRecipe.accepts(level, stack));
-            fluids.addTank(settings.capacity(), Role.OUTPUT);
-        } else {
-            fluids.addTank(settings.capacity(), settings.kind() == STEAM ? Role.OUTPUT : Role.STORAGE,
-                stack -> settings.kind() != STEAM || stack.getFluid().isSame(Fluids.STEAM.get()));
-        }
+        fluids.addTank(settings.capacity(), settings.kind() == STEAM ? Role.OUTPUT : Role.STORAGE,
+            stack -> settings.kind() != STEAM || stack.getFluid().isSame(Fluids.STEAM.get()));
         energy = new EnergyBuffer(settings.capacity(), 0, 4096).onChange(this::contentsChanged);
     }
     /**
@@ -99,12 +83,6 @@ public final class MachineBlockEntity extends BlockEntity implements ScreenHost 
      * @return a copy of the stored fluid stack
      */
     public FluidStack screenFluid() { return fluids.tank(0).getFluid().copy(); }
-    /**
-     * Reads the Distillery's output fluid for the MMDLib screen.
-     *
-     * @return a copy of the output tank contents, empty for single-tank machines
-     */
-    public FluidStack screenOutputFluid() { return fluids.getTanks() > 1 ? fluids.tank(1).getFluid().copy() : FluidStack.EMPTY; }
     /**
      * Reads the configured capacity for the MMDLib status gauges.
      *
@@ -152,8 +130,6 @@ public final class MachineBlockEntity extends BlockEntity implements ScreenHost 
             be.fluids.tank(0).setFluid(new FluidStack(Fluids.STEAM.get(), be.settings.capacity()));
             for (Direction side : Direction.values()) if (level.hasChunkAt(pos.relative(side)))
                 Transfer.pushFluids(level, pos, side, be.fluids, 65535);
-        } else if (kind == DISTILLER) {
-            be.distill(level, pos, state);
         } else if ((kind == DRAIN || kind == DISCHARGE) && ++be.workTicks >= 10) {
             be.workTicks = 0;
             for (Direction side : Direction.values()) if (level.hasChunkAt(pos.relative(side))) {
@@ -165,51 +141,6 @@ public final class MachineBlockEntity extends BlockEntity implements ScreenHost 
         }
     }
     /**
-     * Pulls input from neighbors, runs recipes whose duration scales with their input:output ratio, pushes output to neighbors and updates the lit state.
-     *
-     * @param level owning server world
-     * @param pos block position being ticked
-     * @param state current block state, updated to reflect the active flag
-     */
-    private void distill(Level level, BlockPos pos, BlockState state) {
-        var input = fluids.tank(0);
-        var output = fluids.tank(1);
-        if (++workTicks >= 10) {
-            workTicks = 0;
-            for (Direction side : Direction.values()) if (level.hasChunkAt(pos.relative(side))) {
-                Transfer.pullFluids(level, pos, side, fluids, settings.capacity());
-                Transfer.pushFluids(level, pos, side, fluids, settings.capacity());
-            }
-        }
-        if (progress == 0) startOperation(level, input, output);
-        boolean worked = progress > 0;
-        if (worked && --progress == 0) {
-            output.fill(pendingOutput, IFluidHandler.FluidAction.EXECUTE);
-            pendingOutput = FluidStack.EMPTY;
-        }
-        if (state.hasProperty(DistillerBlock.ACTIVE) && state.getValue(DistillerBlock.ACTIVE) != worked) {
-            level.setBlock(pos, state.setValue(DistillerBlock.ACTIVE, worked), 3);
-        }
-    }
-    /**
-     * Starts an operation if the input tank holds a full recipe amount and the output tank has room; the input is
-     * consumed up front and the output is produced after the recipe's {@link DistillingRecipe#duration()}.
-     *
-     * @param level owning server world
-     * @param input input tank holding the offered fluid
-     * @param output output tank that must have room for the product
-     */
-    private void startOperation(Level level, net.neoforged.neoforge.fluids.capability.templates.FluidTank input,
-            net.neoforged.neoforge.fluids.capability.templates.FluidTank output) {
-        var found = DistillingRecipe.find(level, input.getFluid());
-        if (found.isEmpty()) return;
-        var r = found.get().value();
-        if (output.fill(r.output().copy(), IFluidHandler.FluidAction.SIMULATE) != r.output().getAmount()) return;
-        input.drain(r.input().amount(), IFluidHandler.FluidAction.EXECUTE);
-        pendingOutput = r.output().copy();
-        progress = r.duration();
-    }
-    /**
      * Saves registry-aware MMDLib fluid and energy storage alongside block-entity data.
      *
      * @param tag compound tag read or populated by this operation
@@ -219,8 +150,6 @@ public final class MachineBlockEntity extends BlockEntity implements ScreenHost 
         super.saveAdditional(tag, registries);
         tag.put("Fluids", fluids.serializeNBT(registries));
         tag.put("Energy", energy.serializeNBT(registries));
-        tag.putInt("DistillProgress", progress);
-        if (!pendingOutput.isEmpty()) tag.put("DistillOutput", pendingOutput.save(registries));
     }
     /**
      * Restores registry-aware fluid and energy storage from saved block-entity data.
@@ -231,9 +160,6 @@ public final class MachineBlockEntity extends BlockEntity implements ScreenHost 
     @Override protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
         super.loadAdditional(tag, registries);
         fluids.deserializeNBT(registries, tag.getCompound("Fluids"));
-        progress = tag.getInt("DistillProgress");
-        pendingOutput = tag.contains("DistillOutput") ? FluidStack.parseOptional(registries, tag.getCompound("DistillOutput")) : FluidStack.EMPTY;
-        if (pendingOutput.isEmpty()) progress = 0;
         if (tag.contains("Energy")) energy.deserializeNBT(registries, tag.get("Energy"));
     }
 }

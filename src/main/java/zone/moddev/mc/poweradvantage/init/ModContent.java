@@ -56,7 +56,6 @@ public final class ModContent {
         BLOCK_ENTITY_TYPES.register(bus);
         Fluids.register(bus);
         ModItems.register(bus);
-        Recipes.register(bus);
         FilterContent.registerFactories();
         ElectricityConverterContent.registerFactories();
         SteamConverterContent.registerFactories();
@@ -87,15 +86,6 @@ public final class ModContent {
              */
             public MachineBlock create(BlockContext context) {
                 return new MachineBlock(context.properties(), context.blockEntity().orElseThrow().as(MachineBlockEntity.class));
-            }
-        });
-        api.registerBlockImplementation(id("still"), new BlockImplementation<zone.moddev.mc.poweradvantage.blocks.DistillerBlock>() {
-            public Class<zone.moddev.mc.poweradvantage.blocks.DistillerBlock> blockClass() { return zone.moddev.mc.poweradvantage.blocks.DistillerBlock.class; }
-            public zone.moddev.mc.poweradvantage.blocks.DistillerBlock create(MMDMaterial material, MMDBlock definition) {
-                throw new IllegalStateException("Distiller requires a block-entity binding");
-            }
-            public zone.moddev.mc.poweradvantage.blocks.DistillerBlock create(BlockContext context) {
-                return new zone.moddev.mc.poweradvantage.blocks.DistillerBlock(context.properties(), context.blockEntity().orElseThrow().as(MachineBlockEntity.class));
             }
         });
         api.registerBlockImplementation(id("fluid_switch"), new BlockImplementation<zone.moddev.mc.poweradvantage.blocks.FluidSwitchBlock>() {
@@ -242,6 +232,8 @@ public final class ModContent {
                 event.accept(ModItems.BIOPLASTIC_INGOT.get());
                 event.accept(ModItems.SPROCKET.get());
                 event.accept(ModItems.ROTATOR_TOOL.get());
+                event.accept(ModItems.FLUID_INTAKE_PUMP.get());
+                event.accept(ModItems.FLUID_OUTPUT_PUMP.get());
                 event.accept(Fluids.STEAM_BUCKET.get());
                 event.accept(Fluids.CRUDE_OIL_BUCKET.get());
                 event.accept(Fluids.REFINED_OIL_BUCKET.get());
@@ -263,6 +255,7 @@ public final class ModContent {
      */
     @SuppressWarnings("unchecked")
     private void capabilities(RegisterCapabilitiesEvent event) {
+        zone.moddev.mc.poweradvantage.machine.FluidPumps.registerCapabilities(event);
         for (String name : new String[]{"fluid_pipe","fluid_pipe_terminal","fluid_switch"}) {
             var block = net.minecraft.core.registries.BuiltInRegistries.BLOCK.get(id(name));
             zone.moddev.mc.poweradvantage.blocks.FluidPipeBlock.registerCapabilities(event,

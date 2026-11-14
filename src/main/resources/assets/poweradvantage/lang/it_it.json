@@ -54,5 +54,7 @@
   "screen.poweradvantage.converter_electricity": "Elettricità PA",
   "screen.poweradvantage.electricity_amount": "{value} / {max} unità di elettricità",
   "screen.poweradvantage.redstone.fill_level": "Livello di riempimento",
-  "screen.poweradvantage.redstone.fill_level.description": "L'intensità del segnale segue il livello di riempimento del serbatoio"
+  "screen.poweradvantage.redstone.fill_level.description": "L'intensità del segnale segue il livello di riempimento del serbatoio",
+  "item.poweradvantage.fluid_intake_pump": "Pompa di aspirazione fluidi",
+  "item.poweradvantage.fluid_output_pump": "Pompa di uscita fluidi"
 }

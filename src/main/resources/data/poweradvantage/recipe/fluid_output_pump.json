@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " i ",
+    "isi",
+    " p "
+  ],
+  "key": {
+    "p": { "tag": "poweradvantage:fluid_pipes" },
+    "s": { "tag": "poweradvantage:sprockets" },
+    "i": { "tag": "c:ingots/iron" }
+  },
+  "result": { "id": "poweradvantage:fluid_output_pump" },
+  "group": "fluid_pumps"
+}

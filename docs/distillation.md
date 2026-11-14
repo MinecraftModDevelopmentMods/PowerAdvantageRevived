@@ -1,60 +1,79 @@
 # Distillery and distilling recipes
 
-The Distillery (`poweradvantage:still`, "Distillation Furnace") converts one fluid into another. Its recipes are
-ordinary data-pack recipes of type `poweradvantage:distilling`, so data packs, CraftTweaker and KubeJS can add,
-replace or remove them.
+The Distillery (`poweradvantage:still`, "Distillation Furnace") converts one fluid into another. Since 3.2 it is an
+MMDLib XML machine, defined in [`mmdlib/machine/still.xml`](../src/main/resources/mmdlib/machine/still.xml), and
+`poweradvantage:distilling` is the MMDLib machine recipe type that definition declares. Recipes are ordinary data-pack
+recipes, so data packs, CraftTweaker and KubeJS can add, replace or remove them.
 
 ## Recipe format
 
-Files go in `data/<namespace>/recipe/<name>.json`:
+Files go in `data/<namespace>/recipe/<name>.json`, in MMDLib's machine-recipe format:
 
 ```json
 {
   "type": "poweradvantage:distilling",
-  "input":  { "fluid": "poweradvantage:crude_oil", "amount": 2 },
-  "output": { "id": "poweradvantage:refined_oil", "amount": 1 },
-  "ticks": 2
+  "inputs": {
+    "input": [{ "fluids": "#poweradvantage:crude_oils", "amount": 100 }]
+  },
+  "outputs": {
+    "output": [{ "fluid": { "id": "poweradvantage:refined_oil", "amount": 50 } }]
+  },
+  "time": 100
 }
 ```
 
-| Field    | Required | Meaning |
-|----------|----------|---------|
-| `input`  | yes      | A sized fluid ingredient: `fluid` (a fluid id), `tag` (a fluid tag) or a `neoforge:compound` of `children`, plus `amount` in mB consumed per operation. |
-| `output` | yes      | A fluid stack: `id` and `amount` in mB produced per operation. |
-| `ticks`  | no       | Operation duration in ticks, at least 1. Overrides the automatic duration below. |
+| Field | Meaning |
+|-------|---------|
+| `inputs.input` | One fluid ingredient for the input tank: `fluids` is a fluid ID, a `#tag`, or a list of IDs, and `amount` is the mB consumed per operation. |
+| `outputs.output` | One fluid product for the output tank: `id` and `amount` in mB. |
+| `time` | Ticks per operation. |
 
-The built-in recipe is `poweradvantage:distilling_refined_oil` (2 crude oil to 1 refined oil). Its input is any fluid
-in the common `c:crude_oil` or `c:oils/crude` tags; PA crude oil is in both, so other mods' crude oils that use either
-tag distill without any configuration. Override it by shipping a
-recipe with the same id in a data pack, or remove it with a recipe-removal mod such as KubeJS or CraftTweaker.
+`input` and `output` are the Distillery's tank groups; recipes must use those names. MMDLib's
+[XML machines guide](https://github.com/MinecraftModDevelopmentMods/MMDLib/blob/master-2.0-1.21.1-neo/docs/xml-machines.md)
+documents the full format, including several recipes in one file (`mmdlib:machine_recipes`).
+
+The built-in recipe is `poweradvantage:distilling_refined_oil`: 100 mB crude oil to 50 mB refined oil in 100 ticks,
+the same 2:1 ratio as 3.1 and nearly the same rate (MMDLib spends one
+tick per cycle choosing the recipe). Its input is the `poweradvantage:crude_oils` fluid tag, which includes the common
+`c:crude_oil` and `c:oils/crude` tags, so other mods' crude oils that use either tag distill without configuration.
+Override the recipe by shipping one with the same ID in a data pack, or remove it with KubeJS or CraftTweaker.
+
+3.0 and 3.1 recipes (`"input"`, `"output"`, optional `"ticks"`) no longer load; rewrite them in this format.
 
 ## Behaviour
 
-- The Distillery has two 4,000 mB tanks: input and output. Screen labels read just "Input" and "Output"; recipes
-  come from data, so no fluid is named.
-- The input tank only accepts a fluid that some recipe uses. Neighbouring fluid handlers (pipes, tanks) fill the input
-  tank and drain the output tank every ten ticks.
-- An operation starts when the input tank holds the recipe's full input amount and the output tank has room for its
-  full output. The input is consumed at the start. The output appears when the timer ends.
-- **Duration** is the input:output ratio, rounded up and never below one tick, unless `ticks` is set.
-  2:1 takes 2 ticks (10 operations per second); 10:2 takes 5 ticks (4 per second).
-- Progress and the pending output are saved with the block. If a recipe is removed mid-operation, that operation
-  still completes.
-- The block's `active` state is true while an operation is running, which switches between the `still_on` and
-  `still_off` models.
-- If several recipes accept the same fluid, the first match wins; avoid overlapping inputs.
+- Two 4,000 mB tanks: input and output. The input only accepts fluids some recipe uses. Buckets and other fluid
+  containers work on the block and on the screen's tank gauges.
+- An operation starts when the input holds the recipe's full amount and the output has room for its product. MMDLib's
+  processor reserves both, so neither can be taken while the operation runs.
+- The front shows a lit furnace while an operation runs.
+- The screen is MMDLib's standard machine screen: tank gauges, a progress arrow (which opens the recipe in JEI when
+  JEI is installed), pause, side configuration, redstone control and statistics.
+- Pipes can fill the input and drain the output through the faces enabled in side configuration.
+
+## Fluid pumps
+
+3.1's Distillery pulled from and pushed into neighbouring blocks by itself. Since 3.2 that is done by two addon items,
+installed in a fluid group's addon slots in the side configuration drawer:
+
+- **Fluid Intake Pump**: pulls fluid into the group from neighbouring blocks.
+- **Fluid Output Pump**: pushes fluid from the group into neighbouring blocks.
+
+Each moves 1,000 mB every 10 ticks, needs no power, and uses only the faces that group is enabled on. Put an intake
+pump in the Distillery's input group and an output pump in its output group to get 3.1's behaviour. Stills from 3.1
+worlds keep their contents but start without pumps.
+
+The pumps are generic MMDLib automation addons, so they work in any MMDLib machine with fluid tanks, including other
+mods'. They are crafted from a fluid pipe, a sprocket and iron ingots.
 
 ## API for other mods
 
-Package `zone.moddev.mc.poweradvantage.api.distillation`:
+Read and match recipes through MMDLib: `MachineContent.recipeType(ResourceLocation.parse("poweradvantage:distilling"))`.
 
-- `DistillingRecipe`: the recipe record, with `duration()`, plus `find(level, fluidStack)` (first recipe whose input
-  and amount match) and `accepts(level, fluidStack)` (any recipe uses this fluid, regardless of amount).
-- `DistillingInput`: the `RecipeInput` carrying the offered fluid. It has no item slots.
-- `init.Recipes.DISTILLING_TYPE` and `DISTILLING_SERIALIZER`: the registered type and serializer.
-
-Use `DistillingRecipe.find` rather than `RecipeManager.getRecipeFor`: the vanilla method treats an input with no item
-slots as empty and never matches.
+For addons written against 3.0 and 3.1, package `zone.moddev.mc.poweradvantage.api.distillation` remains, deprecated:
+`DistillingRecipe.find(level, fluidStack)` and `DistillingRecipe.accepts(level, fluidStack)` read the machine recipes
+and present each recipe with one fluid input and one fluid output as a `DistillingRecipe` view, whose `duration()` is
+the recipe's `time`. The views are not registered recipes; `init.Recipes` and the old JSON codec are gone.
 
 ## Configuration policy
 

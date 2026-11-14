@@ -33,11 +33,7 @@ public record MachineSettings(Kind kind, int capacity) {
     /**
      * Replenishing Forge Energy source with adjacent energy export.
      */
-    ENERGY,
-    /**
-     * Two-tank Distillery converting input fluid through the distillation recipe registry.
-     */
-    DISTILLER }
+    ENERGY }
     /**
      * Codec validating behavior kind and capacity from 1000 through 1000000 units.
      *

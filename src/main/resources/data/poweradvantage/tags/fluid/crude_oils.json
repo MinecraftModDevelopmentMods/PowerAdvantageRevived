@@ -1,0 +1,7 @@
+{
+  "replace": false,
+  "values": [
+    { "id": "#c:crude_oil", "required": false },
+    { "id": "#c:oils/crude", "required": false }
+  ]
+}

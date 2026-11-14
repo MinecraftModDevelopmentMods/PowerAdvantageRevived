@@ -114,36 +114,4 @@ public final class MachineGameTests {
             h.succeed();
         });
     }
-
-    @GameTest(template = "empty")
-    public static void distillerConvertsCrudeToRefined(GameTestHelper h) {
-        var recipe = zone.moddev.mc.poweradvantage.api.distillation.DistillingRecipe.find(h.getLevel(),
-            new FluidStack(zone.moddev.mc.poweradvantage.init.Fluids.CRUDE_OIL.get(), 2));
-        h.assertTrue(recipe.isPresent() && recipe.get().value().input().amount() == 2 && recipe.get().value().output().getAmount() == 1
-            && recipe.get().value().output().getFluid() == zone.moddev.mc.poweradvantage.init.Fluids.REFINED_OIL.get(), "Default 2:1 data recipe");
-        var still = place(h, "still", new BlockPos(2,2,2));
-        h.assertTrue(still.fluids.fill(new FluidStack(Fluids.WATER, 1000), FluidAction.EXECUTE) == 0, "Input filter");
-        h.assertTrue(still.fluids.fill(new FluidStack(zone.moddev.mc.poweradvantage.init.Fluids.CRUDE_OIL.get(), 1000), FluidAction.EXECUTE) == 1000, "Crude accepted");
-        MachineBlockEntity.serverTick(h.getLevel(), still.getBlockPos(), still.getBlockState(), still);
-        h.assertTrue(still.fluids.tank(0).getFluidAmount() == 998 && still.fluids.tank(1).isEmpty(), "Input consumed at start, output pending");
-        MachineBlockEntity.serverTick(h.getLevel(), still.getBlockPos(), still.getBlockState(), still);
-        h.assertTrue(still.fluids.tank(1).getFluidAmount() == 1, "2:1 recipe finishes in 2 ticks");
-        h.assertTrue(new zone.moddev.mc.poweradvantage.api.distillation.DistillingRecipe(net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient.of(Fluids.WATER, 10), new FluidStack(Fluids.LAVA, 2), java.util.Optional.empty()).duration() == 5, "10:2 takes 5 ticks");
-        h.assertTrue(still.fluids.tank(1).getFluid().getFluid() == zone.moddev.mc.poweradvantage.init.Fluids.REFINED_OIL.get(), "Refined output");
-        h.succeed();
-    }
-
-    @GameTest(template = "empty")
-    public static void distillerAcceptsCommonCrudeOilTags(GameTestHelper h) {
-        var crude = new FluidStack(zone.moddev.mc.poweradvantage.init.Fluids.CRUDE_OIL.get(), 1);
-        for (var tag : new String[]{"crude_oil", "oils/crude"})
-            h.assertTrue(crude.is(net.minecraft.tags.TagKey.create(net.minecraft.core.registries.Registries.FLUID, net.minecraft.resources.ResourceLocation.fromNamespaceAndPath("c", tag))), "PA crude oil must be in c:" + tag);
-        // GameTest data shadows c:oils/crude (same pack), repeating PA crude oil and adding lava as another mod's oil.
-        var still = place(h, "still", new BlockPos(2,2,2));
-        h.assertTrue(still.fluids.fill(new FluidStack(Fluids.LAVA, 1000), FluidAction.EXECUTE) == 1000, "Tagged foreign crude oil accepted");
-        MachineBlockEntity.serverTick(h.getLevel(), still.getBlockPos(), still.getBlockState(), still);
-        MachineBlockEntity.serverTick(h.getLevel(), still.getBlockPos(), still.getBlockState(), still);
-        h.assertTrue(still.fluids.tank(1).getFluid().getFluid() == zone.moddev.mc.poweradvantage.init.Fluids.REFINED_OIL.get(), "Tagged foreign crude oil distills to refined oil");
-        h.succeed();
-    }
 }

@@ -1,0 +1,20 @@
+{
+  "parent": "block/block",
+  "textures": {
+    "front": "minecraft:block/furnace_front",
+    "particle": "poweradvantage:block/materials/steel"
+  },
+  "elements": [
+    {
+      "from": [0, 0, 0],
+      "to": [16, 8, 16],
+      "faces": {
+        "north": {
+          "uv": [0, 8, 16, 16],
+          "texture": "#front",
+          "cullface": "north"
+        }
+      }
+    }
+  ]
+}

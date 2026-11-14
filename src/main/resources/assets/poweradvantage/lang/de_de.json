@@ -54,5 +54,7 @@
   "screen.poweradvantage.converter_electricity": "PA-Elektrizität",
   "screen.poweradvantage.electricity_amount": "{value} / {max} Elektrizitätseinheiten",
   "screen.poweradvantage.redstone.fill_level": "Füllstand",
-  "screen.poweradvantage.redstone.fill_level.description": "Die Signalstärke folgt dem Füllstand des Tanks"
+  "screen.poweradvantage.redstone.fill_level.description": "Die Signalstärke folgt dem Füllstand des Tanks",
+  "item.poweradvantage.fluid_intake_pump": "Flüssigkeits-Ansaugpumpe",
+  "item.poweradvantage.fluid_output_pump": "Flüssigkeits-Ausgabepumpe"
 }

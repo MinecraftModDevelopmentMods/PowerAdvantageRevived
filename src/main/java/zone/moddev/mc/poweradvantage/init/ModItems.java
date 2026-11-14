@@ -20,6 +20,12 @@ public final class ModItems {
     public static final DeferredHolder<Item, Item> SPROCKET = ITEMS.register("sprocket", () -> new Item(new Item.Properties()));
     /** Reusable block rotation tool. */
     public static final DeferredHolder<Item, RotationTool> ROTATOR_TOOL = ITEMS.register("rotator_tool", RotationTool::new);
+    /** MMDLib machine addon pulling fluid in from neighbours; see {@link zone.moddev.mc.poweradvantage.machine.FluidPumps}. */
+    public static final DeferredHolder<Item, Item> FLUID_INTAKE_PUMP = ITEMS.register("fluid_intake_pump",
+        () -> new Item(new Item.Properties().stacksTo(1)));
+    /** MMDLib machine addon pushing fluid out to neighbours; see {@link zone.moddev.mc.poweradvantage.machine.FluidPumps}. */
+    public static final DeferredHolder<Item, Item> FLUID_OUTPUT_PUMP = ITEMS.register("fluid_output_pump",
+        () -> new Item(new Item.Properties().stacksTo(1)));
     /** Prevents construction of this registration holder. */
     private ModItems() {}
     /** Attaches registration to the owning mod bus.
