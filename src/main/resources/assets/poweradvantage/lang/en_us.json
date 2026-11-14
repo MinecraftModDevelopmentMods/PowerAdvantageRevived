@@ -63,5 +63,7 @@
   "screen.poweradvantage.filter_overflow": "Prefers the lower inventory; uses forward output when full",
   "screen.poweradvantage.converter_fe": "FE / RF",
   "screen.poweradvantage.converter_electricity": "PA electricity",
-  "screen.poweradvantage.electricity_amount": "{value} / {max} electricity units"
+  "screen.poweradvantage.electricity_amount": "{value} / {max} electricity units",
+  "screen.poweradvantage.redstone.fill_level": "Fill level",
+  "screen.poweradvantage.redstone.fill_level.description": "Signal strength follows how full the tank is"
 }

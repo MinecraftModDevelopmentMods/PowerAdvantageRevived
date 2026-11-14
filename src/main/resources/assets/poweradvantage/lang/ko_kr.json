@@ -52,5 +52,7 @@
   "screen.poweradvantage.filter_overflow": "아래쪽 보관함을 우선 사용하며, 가득 차면 앞으로 출력",
   "screen.poweradvantage.converter_fe": "FE / RF",
   "screen.poweradvantage.converter_electricity": "PA 전력",
-  "screen.poweradvantage.electricity_amount": "{value} / {max} 전력 단위"
+  "screen.poweradvantage.electricity_amount": "{value} / {max} 전력 단위",
+  "screen.poweradvantage.redstone.fill_level": "충전 수준",
+  "screen.poweradvantage.redstone.fill_level.description": "신호 세기가 탱크가 찬 정도에 따라 달라집니다"
 }

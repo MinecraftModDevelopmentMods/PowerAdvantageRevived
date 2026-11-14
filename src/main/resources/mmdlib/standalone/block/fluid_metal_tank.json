@@ -1,7 +1,0 @@
-{
-  "module": "poweradvantage:machine",
-  "block_entity_data": {
-    "kind": "TANK",
-    "capacity": 16000
-  }
-}

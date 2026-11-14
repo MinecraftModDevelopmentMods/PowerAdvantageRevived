@@ -245,6 +245,13 @@ public final class ModContent {
                 event.accept(Fluids.STEAM_BUCKET.get());
                 event.accept(Fluids.CRUDE_OIL_BUCKET.get());
                 event.accept(Fluids.REFINED_OIL_BUCKET.get());
+                // XML machines (mmdlib/machine/*.xml) are registered by MMDLib, which lists them in its own
+                // Data-defined Machines tab; list Power Advantage's here as well.
+                zone.moddev.mc.lib.machine.neoforge.MachineContent.definitions().keySet().stream()
+                    .filter(machine -> machine.getNamespace().equals(PowerAdvantage.MODID))
+                    .sorted()
+                    .flatMap(machine -> net.minecraft.core.registries.BuiltInRegistries.ITEM.getOptional(machine).stream())
+                    .forEach(event::accept);
             }
         });
     }

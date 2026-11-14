@@ -10,7 +10,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.*;
 import net.neoforged.neoforge.gametest.*;
 import zone.moddev.mc.poweradvantage.init.ModContent;
-import zone.moddev.mc.poweradvantage.tiles.MachineBlockEntity;
 
 @GameTestHolder(PowerAdvantage.MODID)
 @PrefixGameTestTemplate(false)
@@ -24,7 +23,7 @@ public final class BucketInteractionGameTests {
             x += 2;
             h.setBlock(rel, BuiltInRegistries.BLOCK.get(ModContent.id("fluid_storage_tank")));
             BlockPos abs = h.absolutePos(rel);
-            var tank = (MachineBlockEntity) h.getLevel().getBlockEntity(abs);
+            var tank = Machines.of(h.getLevel().getBlockEntity(abs));
             var hit = new BlockHitResult(Vec3.atCenterOf(abs), face, abs, false);
             player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.WATER_BUCKET));
             h.getLevel().getBlockState(abs).useItemOn(player.getMainHandItem(), h.getLevel(), player, InteractionHand.MAIN_HAND, hit);
@@ -42,8 +41,8 @@ public final class BucketInteractionGameTests {
         for (int x = 3; x <= 5; x++) h.setBlock(new BlockPos(x, 3, 5), BuiltInRegistries.BLOCK.get(ModContent.id("fluid_pipe")));
         var tankRel = new BlockPos(6, 3, 5);
         h.setBlock(tankRel, BuiltInRegistries.BLOCK.get(ModContent.id("fluid_storage_tank")));
-        var drain = (MachineBlockEntity) h.getLevel().getBlockEntity(h.absolutePos(drainRel));
-        var tank = (MachineBlockEntity) h.getLevel().getBlockEntity(h.absolutePos(tankRel));
+        var drain = Machines.of(h.getLevel().getBlockEntity(h.absolutePos(drainRel)));
+        var tank = Machines.of(h.getLevel().getBlockEntity(h.absolutePos(tankRel)));
         BlockPos source = h.absolutePos(drainRel).above();
         for (Direction side : new Direction[]{Direction.UP, Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST})
             h.getLevel().setBlockAndUpdate(source.relative(side), Blocks.STONE.defaultBlockState());
@@ -62,7 +61,7 @@ public final class BucketInteractionGameTests {
         BlockPos rel = new BlockPos(3, 2, 3);
         h.setBlock(rel, BuiltInRegistries.BLOCK.get(ModContent.id("fluid_storage_tank")));
         BlockPos abs = h.absolutePos(rel);
-        var tank = (MachineBlockEntity) h.getLevel().getBlockEntity(abs);
+        var tank = Machines.of(h.getLevel().getBlockEntity(abs));
         tank.fluids.fill(new net.neoforged.neoforge.fluids.FluidStack(net.minecraft.world.level.material.Fluids.WATER, 2000), net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction.EXECUTE);
         var player = h.makeMockPlayer(GameType.SURVIVAL);
         player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.BUCKET));

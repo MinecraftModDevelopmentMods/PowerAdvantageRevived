@@ -52,5 +52,7 @@
   "screen.poweradvantage.filter_overflow": "下のインベントリを優先し、満杯なら前方へ搬出",
   "screen.poweradvantage.converter_fe": "FE / RF",
   "screen.poweradvantage.converter_electricity": "PA電力",
-  "screen.poweradvantage.electricity_amount": "{value} / {max} 電力単位"
+  "screen.poweradvantage.electricity_amount": "{value} / {max} 電力単位",
+  "screen.poweradvantage.redstone.fill_level": "充填レベル",
+  "screen.poweradvantage.redstone.fill_level.description": "信号の強さはタンクの充填量に応じて変わります"
 }

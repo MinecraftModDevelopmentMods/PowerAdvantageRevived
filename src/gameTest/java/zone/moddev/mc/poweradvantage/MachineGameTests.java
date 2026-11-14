@@ -31,8 +31,9 @@ public final class MachineGameTests {
     }
     @GameTest(template = "empty")
     public static void registrationStorageAndPersistence(GameTestHelper h) {
-        String[] names = {"fluid_storage_tank", "fluid_metal_tank", "fluid_drain", "fluid_discharge", "infinite_steam", "infinite_power"};
-        int[] capacities = {4000, 16000, 2000, 1000, 131070, 65535};
+        // The tanks are XML machines now; TankGameTests covers them.
+        String[] names = {"fluid_drain", "fluid_discharge", "infinite_steam", "infinite_power"};
+        int[] capacities = {2000, 1000, 131070, 65535};
         for (int i = 0; i < names.length; i++) {
             var be = place(h, names[i], new BlockPos(2+i,2,2));
             h.assertTrue(be.settings.capacity() == capacities[i], "Wrong data-driven capacity " + names[i]);
@@ -42,16 +43,12 @@ public final class MachineGameTests {
                 h.assertTrue(cap != null, "Missing capability on " + side);
             }
         }
-        var tank = (MachineBlockEntity) h.getLevel().getBlockEntity(h.absolutePos(new BlockPos(2,2,2)));
-        tank.fluids.fill(new FluidStack(Fluids.WATER, 2000), FluidAction.EXECUTE);
-        h.assertTrue(tank.redstoneSignal() == 7, "Tank redstone output");
-        var saved = tank.saveWithoutMetadata(h.getLevel().registryAccess());
-        var restored = new MachineBlockEntity(tank.getType(), tank.getBlockPos(), tank.getBlockState(), tank.settings);
+        var drain = (MachineBlockEntity) h.getLevel().getBlockEntity(h.absolutePos(new BlockPos(2,2,2)));
+        drain.fluids.fill(new FluidStack(Fluids.WATER, 1500), FluidAction.EXECUTE);
+        var saved = drain.saveWithoutMetadata(h.getLevel().registryAccess());
+        var restored = new MachineBlockEntity(drain.getType(), drain.getBlockPos(), drain.getBlockState(), drain.settings);
         restored.loadWithComponents(saved, h.getLevel().registryAccess());
-        h.assertTrue(restored.fluids.tank(0).getFluidAmount() == 2000, "Tank NBT round trip");
-        var target = new FluidTank(1000);
-        h.assertTrue(Transfer.fluids(tank.fluids, target, 1000) == 1000, "Fluid transfer amount");
-        h.assertTrue(tank.fluids.tank(0).getFluidAmount() == 1000 && target.getFluidAmount() == 1000, "Fluid conservation");
+        h.assertTrue(restored.fluids.tank(0).getFluidAmount() == 1500, "Machine NBT round trip");
         h.succeed();
     }
     @GameTest(template = "empty")
@@ -90,7 +87,8 @@ public final class MachineGameTests {
     @GameTest(template = "empty", timeoutTicks = 50)
     public static void drainTicksPushIntoNeighbour(GameTestHelper h) {
         var drain = place(h, "fluid_drain", new BlockPos(5,2,5));
-        var sink = place(h, "fluid_storage_tank", new BlockPos(6,2,5));
+        h.setBlock(new BlockPos(6,2,5), BuiltInRegistries.BLOCK.get(ModContent.id("fluid_storage_tank")));
+        var sink = Machines.of(h.getLevel().getBlockEntity(h.absolutePos(new BlockPos(6,2,5))));
         BlockPos source = drain.getBlockPos().above();
         for (Direction side : new Direction[]{Direction.UP,Direction.NORTH,Direction.SOUTH,Direction.EAST,Direction.WEST})
             h.getLevel().setBlockAndUpdate(source.relative(side), Blocks.STONE.defaultBlockState());
@@ -104,7 +102,8 @@ public final class MachineGameTests {
     @GameTest(template = "empty", timeoutTicks = 50)
     public static void dischargeTicksPullFromNeighbour(GameTestHelper h) {
         var discharge = place(h, "fluid_discharge", new BlockPos(5,3,5));
-        var supply = place(h, "fluid_storage_tank", new BlockPos(6,3,5));
+        h.setBlock(new BlockPos(6,3,5), BuiltInRegistries.BLOCK.get(ModContent.id("fluid_storage_tank")));
+        var supply = Machines.of(h.getLevel().getBlockEntity(h.absolutePos(new BlockPos(6,3,5))));
         supply.fluids.fill(new FluidStack(Fluids.WATER,1000),FluidAction.EXECUTE);
         BlockPos target = discharge.getBlockPos().below();
         for (Direction side : new Direction[]{Direction.DOWN,Direction.NORTH,Direction.SOUTH,Direction.EAST,Direction.WEST})

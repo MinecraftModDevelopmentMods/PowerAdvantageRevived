@@ -52,5 +52,7 @@
   "screen.poweradvantage.filter_overflow": "Preferisce l’inventario inferiore; se pieno, usa l’uscita anteriore",
   "screen.poweradvantage.converter_fe": "FE / RF",
   "screen.poweradvantage.converter_electricity": "Elettricità PA",
-  "screen.poweradvantage.electricity_amount": "{value} / {max} unità di elettricità"
+  "screen.poweradvantage.electricity_amount": "{value} / {max} unità di elettricità",
+  "screen.poweradvantage.redstone.fill_level": "Livello di riempimento",
+  "screen.poweradvantage.redstone.fill_level.description": "L'intensità del segnale segue il livello di riempimento del serbatoio"
 }

@@ -11,7 +11,6 @@ import net.neoforged.neoforge.gametest.*;
 import zone.moddev.mc.poweradvantage.blocks.FluidPipeBlock;
 import zone.moddev.mc.poweradvantage.init.*;
 import zone.moddev.mc.poweradvantage.power.*;
-import zone.moddev.mc.poweradvantage.tiles.MachineBlockEntity;
 
 @GameTestHolder(PowerAdvantage.MODID)
 @PrefixGameTestTemplate(false)
@@ -92,7 +91,7 @@ public final class SteamConverterGameTests {
         h.setBlock(new BlockPos(7,3,5),BuiltInRegistries.BLOCK.get(ModContent.id("fluid_metal_tank")));
         h.runAfterDelay(80,()->{
             var source = h.getLevel().getCapability(Capabilities.EnergyStorage.BLOCK,h.absolutePos(new BlockPos(3,3,5)),Direction.EAST);
-            var target = (MachineBlockEntity) h.getLevel().getBlockEntity(h.absolutePos(new BlockPos(7,3,5)));
+            var target = Machines.of(h.getLevel().getBlockEntity(h.absolutePos(new BlockPos(7,3,5))));
             int delivered = target.fluids.tank(0).getFluidAmount();
             h.assertTrue(delivered > 0 && target.fluids.tank(0).getFluid().getFluid().isSame(Fluids.STEAM.get()),"Fluid network must extract generated steam and deliver it to a tank");
             h.assertTrue(source.getEnergyStored()+be.screenFe()+8L*(be.screenSteam().getAmount()+delivered) == 50000,"FE source, steam in transit/destination and stored FE must conserve energy");

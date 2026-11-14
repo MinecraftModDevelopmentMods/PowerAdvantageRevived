@@ -1,0 +1,9 @@
+<machine xmlns="https://moddev.zone/mmdlib/machine" version="1"
+         extends="poweradvantage:base_tank" name="Metal Fluid Tank">
+  <appearance preset="model" model="poweradvantage:block/machine/fluid_metal_tank"/>
+  <storage>
+    <fluids id="Fluids">
+      <tank id="contents" capacity="16000" role="storage"/>
+    </fluids>
+  </storage>
+</machine>

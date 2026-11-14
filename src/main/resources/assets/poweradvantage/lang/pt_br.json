@@ -52,5 +52,7 @@
   "screen.poweradvantage.filter_overflow": "Prioriza o inventário inferior; se estiver cheio, usa a saída frontal",
   "screen.poweradvantage.converter_fe": "FE / RF",
   "screen.poweradvantage.converter_electricity": "Eletricidade PA",
-  "screen.poweradvantage.electricity_amount": "{value} / {max} unidades de eletricidade"
+  "screen.poweradvantage.electricity_amount": "{value} / {max} unidades de eletricidade",
+  "screen.poweradvantage.redstone.fill_level": "Nível de enchimento",
+  "screen.poweradvantage.redstone.fill_level.description": "A intensidade do sinal acompanha o quanto o tanque está cheio"
 }

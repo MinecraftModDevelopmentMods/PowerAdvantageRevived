@@ -52,5 +52,7 @@
   "screen.poweradvantage.filter_overflow": "Bevorzugt das untere Inventar; bei vollem Inventar nach vorn",
   "screen.poweradvantage.converter_fe": "FE / RF",
   "screen.poweradvantage.converter_electricity": "PA-Elektrizität",
-  "screen.poweradvantage.electricity_amount": "{value} / {max} Elektrizitätseinheiten"
+  "screen.poweradvantage.electricity_amount": "{value} / {max} Elektrizitätseinheiten",
+  "screen.poweradvantage.redstone.fill_level": "Füllstand",
+  "screen.poweradvantage.redstone.fill_level.description": "Die Signalstärke folgt dem Füllstand des Tanks"
 }

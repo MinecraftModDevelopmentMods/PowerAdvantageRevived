@@ -1,0 +1,23 @@
+<!--
+  Shared fluid tank: one storage tank, no item slots and no recipes.
+
+  The fluid storage ID is "Fluids", the key Power Advantage 3.0 and 3.1 machines saved their tanks under, so
+  tanks in those worlds load their contents unchanged. Do not rename it.
+
+  TankLevelSignal offers the fill level as a redstone output and, the first time a tank runs, sets every face to
+  emit it, as 3.0 and 3.1 tanks did.
+-->
+<machine xmlns="https://moddev.zone/mmdlib/machine" version="1" abstract="true"
+         extends="mmdlib:base_machine">
+  <block hardness="1.5" no-occlusion="true"/>
+  <storage>
+    <fluids id="Fluids">
+      <tank id="contents" capacity="4000" role="storage"/>
+    </fluids>
+  </storage>
+  <processor id="level" class="zone.moddev.mc.poweradvantage.machine.TankLevelSignal"/>
+  <screen xmlns="https://moddev.zone/mmdlib/screen">
+    <fill name="machine"/>
+    <fill name="inventory_controls"/>
+  </screen>
+</machine>
