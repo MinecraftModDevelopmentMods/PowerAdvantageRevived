@@ -30,3 +30,5 @@
     blocks can still draw electricity and steam from them, but FE now leaves only through the transformer's own
     pushing. Their sizes and rates are no longer set through block-entity data.
   - XML machines resist explosions like other blocks of their hardness (1.5) instead of 6.
+  - The eight item filters are unchanged. Their per-item routing needs their own item capability, which XML
+    machines don't support yet; see `docs/item-filters.md`.
