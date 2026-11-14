@@ -92,7 +92,7 @@ public final class MachineBlockEntity extends BlockEntity implements ScreenHost 
      *
      * @return stored energy
      */
-    public int screenEnergy() { return energy.getEnergyStored(); }
+    public int screenStoredEnergy() { return energy.getEnergyStored(); }
     /**
      * Reads the current fluid for the MMDLib fluid screen.
      *

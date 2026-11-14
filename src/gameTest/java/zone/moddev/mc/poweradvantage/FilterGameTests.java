@@ -38,7 +38,11 @@ public final class FilterGameTests {
             h.assertTrue(zone.moddev.mc.lib.gui.Screens.get(ModContent.id("item_filter_" + kinds[i])).isPresent(), "Missing bound XML screen");
             var menu = new zone.moddev.mc.lib.gui.runtime.MachineMenu(1,
                 h.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL).getInventory(), be);
-            h.assertTrue(menu.slots.size() == (kinds[i].equals("inventory") ? 46 : 37), "MMDLib menu must contain cargo, samples and player inventory");
+            // One cargo slot, nine samples for the inventory filter, and MMDLib's player slots:
+            // 36 inventory, 4 armour and the offhand.
+            int expected = (kinds[i].equals("inventory") ? 10 : 1) + 36 + 4 + 1;
+            h.assertTrue(menu.slots.size() == expected, "MMDLib menu must contain cargo, samples and player inventory: expected "
+                + expected + " slots, got " + menu.slots.size() + " for " + kinds[i]);
             h.assertTrue(be.screenItems().getSlots() == (kinds[i].equals("inventory") ? 10 : 1), "Screen slot count");
             h.assertTrue(h.getLevel().getRecipeManager().byKey(ModContent.id("item_filter_" + kinds[i])).isPresent(), "Crafting recipe missing");
         }

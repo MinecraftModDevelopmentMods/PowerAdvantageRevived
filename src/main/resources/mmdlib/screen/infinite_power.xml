@@ -5,7 +5,7 @@
   <vbox padding="8" spacing="5" align="center">
     <label text="screen.poweradvantage.energy" text-fallback="Energy"/>
     <gauge id="energy" orientation="horizontal" length="8s" color="#DCA92B"
-           value="#screenEnergy" max="#screenCapacity"
+           value="#screenStoredEnergy" max="#screenCapacity"
            tooltip="screen.poweradvantage.energy_amount"
            tooltip-fallback="{value} / {max} FE"/>
   </vbox>
