@@ -1,0 +1,20 @@
+<!--
+  Electricity-RF Transformer: FE/RF to Power Advantage electricity at 1 FE to 4 units (ElectricityExchange).
+
+  The FE side is this machine's energy buffer; the electricity side is the processor's saved buffer, exposed as the
+  poweradvantage:electricity capability. Buffered FE and electricity in 3.0/3.1 worlds are not carried over.
+-->
+<machine xmlns="https://moddev.zone/mmdlib/machine" version="1"
+         extends="mmdlib:base_powered_machine" name="Electricity-RF Transformer">
+  <block hardness="1.5" no-occlusion="true"/>
+  <appearance preset="model" model="poweradvantage:block/machine/converter_rf_electricity"/>
+  <storage>
+    <energy id="energy" capacity="1000" input-rate="1000" output-rate="1000"/>
+  </storage>
+  <processor id="exchange" class="zone.moddev.mc.poweradvantage.machine.ElectricityExchange"/>
+  <screen xmlns="https://moddev.zone/mmdlib/screen">
+    <fill name="machine">
+      <label id="electricity" variable="$processors.exchange.details" width="140" height="12"/>
+    </fill>
+  </screen>
+</machine>

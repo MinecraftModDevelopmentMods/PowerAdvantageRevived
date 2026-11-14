@@ -56,5 +56,6 @@
   "screen.poweradvantage.redstone.fill_level": "充填レベル",
   "screen.poweradvantage.redstone.fill_level.description": "信号の強さはタンクの充填量に応じて変わります",
   "item.poweradvantage.fluid_intake_pump": "流体吸入ポンプ",
-  "item.poweradvantage.fluid_output_pump": "流体排出ポンプ"
+  "item.poweradvantage.fluid_output_pump": "流体排出ポンプ",
+  "screen.poweradvantage.electricity_stored": "PA電力: %s / %s"
 }

@@ -25,4 +25,8 @@
   - The Infinite Power Source, Infinite Steam Source, Drain and Discharge Grate are XML machines, with their 3.1
     behaviour in Power Advantage processors. Each can be paused from its screen. The Infinite Power Source still
     pushes 4096 FE per tick into every neighbour, but other blocks can no longer pull power out of it.
+  - The Electricity-RF and Steam-RF Transformers are XML machines with the same exchange ratios, buffers and
+    neighbour service as 3.1. Steam in existing transformers is kept; buffered FE and electricity are not. Other
+    blocks can still draw electricity and steam from them, but FE now leaves only through the transformer's own
+    pushing. Their sizes and rates are no longer set through block-entity data.
   - XML machines resist explosions like other blocks of their hardness (1.5) instead of 6.

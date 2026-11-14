@@ -16,7 +16,6 @@ import zone.moddev.mc.lib.api.capabilities.FluidStorage;
 import zone.moddev.mc.lib.api.capabilities.Role;
 import zone.moddev.mc.lib.machine.neoforge.DefinedMachineEntity;
 import zone.moddev.mc.poweradvantage.init.ModContent;
-import zone.moddev.mc.poweradvantage.power.ElectricityConverterBlockEntity;
 import zone.moddev.mc.poweradvantage.util.WorldFluids;
 
 /**
@@ -95,9 +94,9 @@ public final class MachineGameTests {
     public static void infinitePowerPushesIntoNeighbours(GameTestHelper h) {
         var source = place(h, "infinite_power", new BlockPos(3, 2, 3));
         h.setBlock(new BlockPos(4, 2, 3), BuiltInRegistries.BLOCK.get(ModContent.id("converter_rf_electricity")));
-        var converter = (ElectricityConverterBlockEntity) h.getLevel().getBlockEntity(h.absolutePos(new BlockPos(4, 2, 3)));
+        var converter = (DefinedMachineEntity) h.getLevel().getBlockEntity(h.absolutePos(new BlockPos(4, 2, 3)));
         h.runAfterDelay(5, () -> {
-            h.assertTrue(converter.screenFe() > 0, "Infinite power must push FE into a neighbouring consumer");
+            h.assertTrue(converter.energy.stored() > 0, "Infinite power must push FE into a neighbouring consumer");
             h.assertTrue(source.energy.stored() == source.energy.capacity(), "Infinite power refills itself");
             var capability = h.getLevel().getCapability(Capabilities.EnergyStorage.BLOCK, source.getBlockPos(), Direction.NORTH);
             h.assertTrue(capability == null || !capability.canReceive(), "Infinite power must not accept FE");

@@ -35,39 +35,25 @@ empty buckets interact directly with the block. Whole-bucket extraction requires
 produced from FE is therefore normally collected through pipes or smaller fluid
 containers; addons can choose a larger steam capacity if desired.
 
-There is no item inventory. Both stores persist across saves. Capability simulation
-is read-only, returned fluid stacks are snapshots, and external capability calls
-cannot reenter an active transfer. Cached handlers stop transferring after block
-removal. The converter drops itself on breaking; stored energy/steam is not
-preserved in the dropped item.
+There is no item inventory. Both stores persist across saves; converters from 3.0
+and 3.1 worlds keep their steam but start with an empty FE buffer. Capability
+simulation is read-only. The converter drops itself on breaking; stored energy/steam
+is not preserved in the dropped item.
 
-## MMDLib integration and settings
+## MMDLib XML machine and settings
 
-MMDLib supplies the FE `EnergyBuffer`, steam `FluidStorage`, block/entity factory
-binding, XML menu, fluid gauge, value synchronization and screen rendering.
-`BufferedConverterBlockEntity` shares guarded FE storage and neighbor transfers
-between electricity and steam converters; each resource implementation owns its
-exchange rules and its second store.
+Since 3.2 the converter is an MMDLib XML machine,
+[`mmdlib/machine/converter_rf_steam.xml`](../src/main/resources/mmdlib/machine/converter_rf_steam.xml).
+MMDLib supplies the FE buffer, the steam tank (storage ID `Steam`, as 3.1 saved it),
+the capabilities, bucket handling and the standard machine screen with FE and steam
+gauges. Its stored processor, `machine.SteamExchange`, does the exchange, sharing
+neighbor service with the electricity converter through `machine.FeExchangeProcessor`.
 
-Factory settings under `poweradvantage:steam_converter` are:
-
-```json
-{
-  "fe_capacity": 1000,
-  "steam_capacity": 1000,
-  "fe_quantum": 8,
-  "steam_quantum": 1,
-  "fe_per_tick": 1000
-}
-```
-
-They are decoded by `power.SteamConverterSettings`, or can be supplied directly
-in code. Capacities and the rate must fit a complete positive batch. The default
-conversion allowance is 1,000 FE-equivalent per tick, hence at most 125 mB exchanged
-per tick. The automatic FE-service phase has its own allowance of the same size;
-external fluid handlers are bounded by tank contents/capacity and their network's
-limits. External FE calls use the configured FE rate as a per-call limit.
-These are MMDLib factory settings, not an added global TOML option.
+The sizes, ratio and rate are `power.SteamConverterSettings.DEFAULT`: 1,000 FE,
+1,000 mB, 8 FE to 1 mB, and 1,000 FE-equivalent per tick, hence at most 125 mB
+exchanged per tick. They are no longer read from block-entity data. The automatic
+FE-service phase has its own allowance of the same size; external fluid handlers are
+bounded by tank contents/capacity and their network's limits.
 
 The block has a restored PA2 recipe using a governor, steel frame and redstone
 block. Addons supply governor items through `poweradvantage:governors`. Until that
@@ -78,8 +64,6 @@ SteamAdvantage. No replacement governor is invented in PA3.
 
 Server GameTests cover both exact exchange directions, sub-batch FE retention,
 custom ratios and work limits, both capabilities on all faces, fluid simulation,
-water rejection, snapshot isolation, persistence, removed handlers, XML menu
-binding, real FE source/sink neighbors, pipe delivery, and full bucket interactions
-from every face. Existing electricity-converter tests also cover the shared-base
-refactor. Client startup checks cover model, texture and XML resource loading;
+water rejection, persistence including 3.1-format steam, real FE source/sink
+neighbors, pipe delivery, and full bucket interactions from every face. Client startup checks cover model, texture and XML resource loading;
 manual GUI appearance is still a separate check.

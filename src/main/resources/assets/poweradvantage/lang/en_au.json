@@ -57,5 +57,6 @@
   "screen.poweradvantage.redstone.fill_level": "Fill level",
   "screen.poweradvantage.redstone.fill_level.description": "Signal strength follows how full the tank is",
   "item.poweradvantage.fluid_intake_pump": "Fluid Intake Pump",
-  "item.poweradvantage.fluid_output_pump": "Fluid Output Pump"
+  "item.poweradvantage.fluid_output_pump": "Fluid Output Pump",
+  "screen.poweradvantage.electricity_stored": "PA electricity: %s / %s"
 }

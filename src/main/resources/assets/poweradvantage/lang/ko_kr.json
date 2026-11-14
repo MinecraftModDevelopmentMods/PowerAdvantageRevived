@@ -56,5 +56,6 @@
   "screen.poweradvantage.redstone.fill_level": "충전 수준",
   "screen.poweradvantage.redstone.fill_level.description": "신호 세기가 탱크가 찬 정도에 따라 달라집니다",
   "item.poweradvantage.fluid_intake_pump": "유체 흡입 펌프",
-  "item.poweradvantage.fluid_output_pump": "유체 배출 펌프"
+  "item.poweradvantage.fluid_output_pump": "유체 배출 펌프",
+  "screen.poweradvantage.electricity_stored": "PA 전력: %s / %s"
 }

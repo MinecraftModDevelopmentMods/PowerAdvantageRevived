@@ -49,8 +49,6 @@ public final class ModContent {
         Fluids.register(bus);
         ModItems.register(bus);
         FilterContent.registerFactories();
-        ElectricityConverterContent.registerFactories();
-        SteamConverterContent.registerFactories();
         var api = MaterialExtensions.GLOBAL;
         api.registerBlockImplementation(id("fluid_switch"), new BlockImplementation<zone.moddev.mc.poweradvantage.blocks.FluidSwitchBlock>() {
             public Class<zone.moddev.mc.poweradvantage.blocks.FluidSwitchBlock> blockClass() {
@@ -188,15 +186,12 @@ public final class ModContent {
         zone.moddev.mc.poweradvantage.blocks.ConveyorBlock.registerCapabilities(event,
             (zone.moddev.mc.poweradvantage.blocks.ConveyorBlock)net.minecraft.core.registries.BuiltInRegistries.BLOCK.get(id("item_conveyor")));
         runtime.blockEntityTypes().forEach((id, holder) -> {
-            if (id.getPath().equals("converter_rf_steam")) {
-                SteamConverterContent.registerCapabilities(event, holder.get());
-                return;
-            }
-            if (id.getPath().equals("converter_rf_electricity")) {
-                ElectricityConverterContent.registerCapabilities(event, holder.get());
-                return;
-            }
             if (id.getPath().startsWith("item_filter_")) FilterContent.registerCapabilities(event, holder.get());
         });
+        // MMDLib registers the XML converter's FE capability; the electricity side is Power Advantage's own.
+        event.registerBlockEntity(zone.moddev.mc.poweradvantage.power.PowerCapabilities.ELECTRICITY,
+            zone.moddev.mc.lib.machine.neoforge.MachineContent.entityType(id("converter_rf_electricity")),
+            (machine, side) -> machine.features.findProcessor("exchange", zone.moddev.mc.poweradvantage.machine.ElectricityExchange.class)
+                .map(zone.moddev.mc.poweradvantage.machine.ElectricityExchange::port).orElse(null));
     }
 }

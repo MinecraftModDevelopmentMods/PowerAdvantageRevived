@@ -1,9 +1,6 @@
 package zone.moddev.mc.poweradvantage.power;
 
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
-
-/** Data-defined electricity/FE buffer sizes, exact exchange ratio and work limit.
+/** Electricity/FE buffer sizes, exact exchange ratio and work limit.
  * @param feCapacity FE buffer capacity
  * @param electricityCapacity PA electricity buffer capacity
  * @param feQuantum FE per complete conversion batch
@@ -11,16 +8,10 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
  * @param fePerTick FE-equivalent transfer/conversion ceiling per operation tick
  */
 public record ConverterSettings(int feCapacity, int electricityCapacity, int feQuantum, int electricityQuantum, int fePerTick) {
-    /** Validated positive factory settings; defaults preserve PA2's electricity converter. */
-    public static final Codec<ConverterSettings> CODEC = RecordCodecBuilder.create(i -> i.group(
-        Codec.intRange(1, Integer.MAX_VALUE).optionalFieldOf("fe_capacity", 1000).forGetter(ConverterSettings::feCapacity),
-        Codec.intRange(1, Integer.MAX_VALUE).optionalFieldOf("electricity_capacity", 8000).forGetter(ConverterSettings::electricityCapacity),
-        Codec.intRange(1, Integer.MAX_VALUE).optionalFieldOf("fe_quantum", 1).forGetter(ConverterSettings::feQuantum),
-        Codec.intRange(1, Integer.MAX_VALUE).optionalFieldOf("electricity_quantum", 4).forGetter(ConverterSettings::electricityQuantum),
-        Codec.intRange(1, Integer.MAX_VALUE).optionalFieldOf("fe_per_tick", 1000).forGetter(ConverterSettings::fePerTick)
-    ).apply(i, ConverterSettings::new));
+    /** The converter's settings, unchanged from 3.1. */
+    public static final ConverterSettings DEFAULT = new ConverterSettings(1000, 8000, 1, 4, 1000);
 
-    /** Validates settings supplied by code as well as data.
+    /** Validates the settings.
      * @param feCapacity FE buffer capacity
      * @param electricityCapacity electricity buffer capacity
      * @param feQuantum FE per batch

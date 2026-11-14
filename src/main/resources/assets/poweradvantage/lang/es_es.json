@@ -56,5 +56,6 @@
   "screen.poweradvantage.redstone.fill_level": "Nivel de llenado",
   "screen.poweradvantage.redstone.fill_level.description": "La intensidad de la señal sigue lo lleno que está el tanque",
   "item.poweradvantage.fluid_intake_pump": "Bomba de admisión de fluidos",
-  "item.poweradvantage.fluid_output_pump": "Bomba de salida de fluidos"
+  "item.poweradvantage.fluid_output_pump": "Bomba de salida de fluidos",
+  "screen.poweradvantage.electricity_stored": "Electricidad PA: %s / %s"
 }

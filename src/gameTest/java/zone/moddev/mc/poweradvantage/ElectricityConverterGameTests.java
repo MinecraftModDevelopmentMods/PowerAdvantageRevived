@@ -10,9 +10,15 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.capabilities.*;
 import net.neoforged.neoforge.energy.*;
 import net.neoforged.neoforge.gametest.*;
+import zone.moddev.mc.lib.api.capabilities.EnergyBuffer;
+import zone.moddev.mc.lib.machine.neoforge.DefinedMachineEntity;
 import zone.moddev.mc.poweradvantage.init.ModContent;
+import zone.moddev.mc.poweradvantage.machine.ElectricityExchange;
 import zone.moddev.mc.poweradvantage.power.*;
 
+/**
+ * The Electricity-RF Transformer as an MMDLib XML machine with the {@link ElectricityExchange} processor.
+ */
 @EventBusSubscriber(modid = PowerAdvantage.MODID, bus = EventBusSubscriber.Bus.MOD)
 @GameTestHolder(PowerAdvantage.MODID)
 @PrefixGameTestTemplate(false)
@@ -25,87 +31,98 @@ public final class ElectricityConverterGameTests {
         event.registerBlock(Capabilities.EnergyStorage.BLOCK, (level,pos,state,be,side) ->
             sinks.computeIfAbsent(pos.immutable(), p -> new EnergyStorage(50000, 5000, 0)), Blocks.REDSTONE_BLOCK);
     }
-    private static ElectricityConverterBlockEntity place(GameTestHelper h) {
-        var pos = new BlockPos(4,3,5);
+    private static DefinedMachineEntity place(GameTestHelper h, BlockPos pos) {
         h.setBlock(pos, BuiltInRegistries.BLOCK.get(ModContent.id("converter_rf_electricity")));
-        return (ElectricityConverterBlockEntity) h.getLevel().getBlockEntity(h.absolutePos(pos));
+        var be = h.getLevel().getBlockEntity(h.absolutePos(pos));
+        h.assertTrue(be instanceof DefinedMachineEntity, "The converter must be an MMDLib XML machine");
+        return (DefinedMachineEntity) be;
     }
-    private static void tick(GameTestHelper h, ElectricityConverterBlockEntity be) {
-        ElectricityConverterBlockEntity.serverTick(h.getLevel(), be.getBlockPos(), be.getBlockState(), be);
+    private static DefinedMachineEntity place(GameTestHelper h) { return place(h, new BlockPos(4,3,5)); }
+    private static ElectricityExchange exchange(DefinedMachineEntity be) {
+        return be.features.findProcessor("exchange", ElectricityExchange.class).orElseThrow();
     }
-    @GameTest(template = "empty")
+    private static long fe(DefinedMachineEntity be) { return be.energy.stored(); }
+    private static long electricity(DefinedMachineEntity be) { return exchange(be).stored(); }
+
+    @GameTest(template = "empty", timeoutTicks = 20)
     public static void registrationCapabilitiesXmlAndExactExchange(GameTestHelper h) {
         var be = place(h);
         for (Direction side : Direction.values()) {
-            h.assertTrue(h.getLevel().getCapability(Capabilities.EnergyStorage.BLOCK, be.getBlockPos(), side) == be.fePort(), "FE capability on " + side);
-            h.assertTrue(h.getLevel().getCapability(PowerCapabilities.ELECTRICITY, be.getBlockPos(), side) == be.electricityPort(), "Electricity capability on " + side);
+            h.assertTrue(h.getLevel().getCapability(Capabilities.EnergyStorage.BLOCK, be.getBlockPos(), side) != null, "FE capability on " + side);
+            h.assertTrue(h.getLevel().getCapability(PowerCapabilities.ELECTRICITY, be.getBlockPos(), side) == exchange(be).port(), "Electricity capability on " + side);
         }
-        h.assertTrue(zone.moddev.mc.lib.gui.Screens.get(ModContent.id("converter_rf_electricity")).isPresent(), "Bound XML screen");
         var menu = new zone.moddev.mc.lib.gui.runtime.MachineMenu(1,
             h.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL).getInventory(), be);
-        h.assertTrue(menu.slots.isEmpty(), "Converter status screen has no item slots");
-        h.assertTrue(be.fePort().receiveEnergy(1000, true) == 1000 && be.screenFe() == 0, "FE simulation must be read only");
-        h.assertTrue(be.fePort().receiveEnergy(1000, false) == 1000, "FE admission");
-        tick(h, be);
-        h.assertTrue(be.screenFe() == 0 && be.screenElectricity() == 4000, "One FE must convert to four electricity units");
-        h.assertTrue(be.electricityPort().extractEnergy(1000, true) == 1000 && be.screenElectricity() == 4000, "Electricity simulation must be read only");
-        h.succeed();
+        h.assertTrue(menu.getType() == zone.moddev.mc.lib.gui.runtime.ScreenRuntime.MENUS.get(), "MMDLib machine menu");
+        var fePort = h.getLevel().getCapability(Capabilities.EnergyStorage.BLOCK, be.getBlockPos(), Direction.UP);
+        h.assertTrue(fePort.receiveEnergy(1000, true) == 1000 && fe(be) == 0, "FE simulation must be read only");
+        h.assertTrue(fePort.receiveEnergy(1000, false) == 1000, "FE admission");
+        h.runAfterDelay(3, () -> {
+            h.assertTrue(fe(be) == 0 && electricity(be) == 4000, "One FE must convert to four electricity units");
+            var port = exchange(be).port();
+            h.assertTrue(port.extractEnergy(1000, true) == 1000 && electricity(be) == 4000, "Electricity simulation must be read only");
+            h.succeed();
+        });
     }
-    @GameTest(template = "empty")
+
+    @GameTest(template = "empty", timeoutTicks = 30)
     public static void reverseExchangeRetainsFractionalBatchesAndSavesBothUnits(GameTestHelper h) {
         var be = place(h);
-        be.electricityPort().receiveEnergy(4003, false);
-        tick(h, be);
-        h.assertTrue(be.screenFe() == 0 && be.screenElectricity() == 4003, "Three surplus electricity units must not round into FE");
-        be.electricityPort().receiveEnergy(1, false);
-        tick(h, be);
-        h.assertTrue(be.screenFe() == 1 && be.screenElectricity() == 4000, "Four surplus units convert to exactly one FE");
-        var saved = be.saveWithoutMetadata(h.getLevel().registryAccess());
-        var restored = new ElectricityConverterBlockEntity(be.getType(), be.getBlockPos(), be.getBlockState(), be.settings);
-        restored.loadWithComponents(saved, h.getLevel().registryAccess());
-        h.assertTrue(restored.screenFe() == 1 && restored.screenElectricity() == 4000, "Both buffers must persist in their own units");
-        var old = be.electricityPort();
-        h.setBlock(new BlockPos(4,3,5), Blocks.AIR);
-        h.assertTrue(old.extractEnergy(4000, false) == 0 && old.receiveEnergy(4, false) == 0, "Removed converter must reject cached handler calls");
-        h.succeed();
+        exchange(be).port().receiveEnergy(4003, false);
+        h.runAfterDelay(3, () -> {
+            h.assertTrue(fe(be) == 0 && electricity(be) == 4003, "Three surplus electricity units must not round into FE");
+            exchange(be).port().receiveEnergy(1, false);
+        });
+        h.runAfterDelay(6, () -> {
+            h.assertTrue(fe(be) == 1 && electricity(be) == 4000, "Four surplus units convert to exactly one FE");
+            var saved = be.saveWithoutMetadata(h.getLevel().registryAccess());
+            var restored = place(h, new BlockPos(6,3,5));
+            restored.loadWithComponents(saved, h.getLevel().registryAccess());
+            h.assertTrue(fe(restored) == 1 && electricity(restored) == 4000, "Both buffers must persist in their own units");
+            var old = exchange(be).port();
+            h.setBlock(new BlockPos(4,3,5), Blocks.AIR);
+            h.assertTrue(old.extractEnergy(4000, false) == 0 && old.receiveEnergy(4, false) == 0, "Removed converter must reject cached handler calls");
+            h.succeed();
+        });
     }
+
     @GameTest(template = "empty", timeoutTicks = 60)
     public static void neighboringFeSourceCanSupplyAnElectricityConsumer(GameTestHelper h) {
         var be = place(h);
         h.setBlock(new BlockPos(3,3,5), Blocks.COAL_BLOCK);
         h.runAfterDelay(20, () -> {
-            h.assertTrue(be.screenElectricity() == 4000, "Neighboring FE source must charge the electricity reserve");
-            h.assertTrue(be.electricityPort().extractEnergy(1000, false) == 1000, "Electricity consumer must be able to draw power");
+            h.assertTrue(electricity(be) == 4000, "Neighboring FE source must charge the electricity reserve");
+            h.assertTrue(exchange(be).port().extractEnergy(1000, false) == 1000, "Electricity consumer must be able to draw power");
         });
         h.runAfterDelay(40, () -> {
             var source = sources.get(h.absolutePos(new BlockPos(3,3,5)));
-            long total = source.getEnergyStored() + be.screenFe() + be.screenElectricity()/4 + 250;
-            h.assertTrue(be.screenElectricity() == 4000 && total == 50000, "Source + converter + consumed output must conserve FE-equivalent energy");
+            long total = source.getEnergyStored() + fe(be) + electricity(be)/4 + 250;
+            h.assertTrue(electricity(be) == 4000 && total == 50000, "Source + converter + consumed output must conserve FE-equivalent energy");
             h.succeed();
         });
     }
+
     @GameTest(template = "empty", timeoutTicks = 60)
     public static void electricityInputFeedsANeighboringFeConsumer(GameTestHelper h) {
         var be = place(h);
         h.setBlock(new BlockPos(5,3,5), Blocks.REDSTONE_BLOCK);
-        be.electricityPort().receiveEnergy(8000, false);
+        exchange(be).port().receiveEnergy(8000, false);
         h.runAfterDelay(20, () -> {
             var sink = sinks.get(h.absolutePos(new BlockPos(5,3,5)));
             h.assertTrue(sink != null && sink.getEnergyStored() > 0, "Electricity must be convertible into delivered FE");
-            h.assertTrue(sink.getEnergyStored() + be.screenFe() + be.screenElectricity()/4 == 2000, "Reverse conversion must conserve FE-equivalent energy");
+            h.assertTrue(sink.getEnergyStored() + fe(be) + electricity(be)/4 == 2000, "Reverse conversion must conserve FE-equivalent energy");
             h.succeed();
         });
     }
+
     @GameTest(template = "empty")
     public static void customRatioAndRateAreRespected(GameTestHelper h) {
-        var registered = place(h);
-        var be = new ElectricityConverterBlockEntity(registered.getType(), registered.getBlockPos(), registered.getBlockState(),
-            new ConverterSettings(1000, 8000, 3, 7, 6));
-        be.setLevel(h.getLevel());
-        be.fePort().receiveEnergy(6, false);
-        tick(h, be);
-        h.assertTrue(be.screenFe() == 0 && be.screenElectricity() == 14, "Data-defined ratio must execute at most two complete batches");
-        h.assertTrue(be.fePort().receiveEnergy(-1, false) == 0 && be.electricityPort().extractEnergy(-1, false) == 0, "Negative requests must do no work");
+        var fe = new EnergyBuffer(1000, 1000);
+        fe.insert(6, false);
+        long electricity = ElectricityExchange.exchange(fe, 0, new ConverterSettings(1000, 8000, 3, 7, 6));
+        h.assertTrue(fe.stored() == 0 && electricity == 14, "A custom ratio must execute at most two complete batches");
+        var port = exchange(place(h)).port();
+        h.assertTrue(port.receiveEnergy(-1, false) == 0 && port.extractEnergy(-1, false) == 0, "Negative requests must do no work");
         h.succeed();
     }
 }

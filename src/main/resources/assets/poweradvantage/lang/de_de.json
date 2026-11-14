@@ -56,5 +56,6 @@
   "screen.poweradvantage.redstone.fill_level": "Füllstand",
   "screen.poweradvantage.redstone.fill_level.description": "Die Signalstärke folgt dem Füllstand des Tanks",
   "item.poweradvantage.fluid_intake_pump": "Flüssigkeits-Ansaugpumpe",
-  "item.poweradvantage.fluid_output_pump": "Flüssigkeits-Ausgabepumpe"
+  "item.poweradvantage.fluid_output_pump": "Flüssigkeits-Ausgabepumpe",
+  "screen.poweradvantage.electricity_stored": "PA-Elektrizität: %s / %s"
 }
