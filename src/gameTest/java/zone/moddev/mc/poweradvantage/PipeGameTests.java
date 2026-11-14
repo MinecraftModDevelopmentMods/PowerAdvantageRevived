@@ -13,7 +13,6 @@ import net.neoforged.neoforge.gametest.*;
 import zone.moddev.mc.poweradvantage.blocks.FluidPipeBlock;
 import zone.moddev.mc.poweradvantage.init.ModContent;
 import zone.moddev.mc.poweradvantage.network.FluidNetworks;
-import zone.moddev.mc.poweradvantage.tiles.MachineBlockEntity;
 
 @GameTestHolder(PowerAdvantage.MODID)
 @PrefixGameTestTemplate(false)
@@ -23,9 +22,9 @@ public final class PipeGameTests {
         h.setBlock(pos(x,z),BuiltInRegistries.BLOCK.get(ModContent.id("fluid_pipe")));
         h.assertTrue(h.getLevel().getBlockEntity(h.absolutePos(pos(x,z)))==null,"Pipe must not have a block entity");
     }
-    private static MachineBlockEntity tank(GameTestHelper h,int x,int z) {
+    private static Machines.View tank(GameTestHelper h,int x,int z) {
         h.setBlock(pos(x,z),BuiltInRegistries.BLOCK.get(ModContent.id("fluid_metal_tank")));
-        return (MachineBlockEntity)h.getLevel().getBlockEntity(h.absolutePos(pos(x,z)));
+        return Machines.of(h.getLevel().getBlockEntity(h.absolutePos(pos(x,z))));
     }
     private static IFluidHandler input(GameTestHelper h,int x,int z,Direction face) {
         var handler=h.getLevel().getCapability(Capabilities.FluidHandler.BLOCK,h.absolutePos(pos(x,z)),face);

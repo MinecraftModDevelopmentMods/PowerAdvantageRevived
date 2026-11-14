@@ -1,6 +1,6 @@
 /**
- * Data-driven Distillery recipes: the {@code poweradvantage:distilling} recipe type, its recipe class and serializer.
- * Recipes are ordinary JSON files in {@code data/<namespace>/recipe/}, so data packs, CraftTweaker and KubeJS can
- * add, replace or remove them.
+ * Compatibility API for Distillery recipes. Since 3.2 {@code poweradvantage:distilling} is the MMDLib machine recipe
+ * type declared by the Distillery's XML definition, and recipes use MMDLib's machine-recipe JSON. The classes here
+ * present those recipes in the form Power Advantage 3.0 and 3.1 addons expect.
  */
 package zone.moddev.mc.poweradvantage.api.distillation;

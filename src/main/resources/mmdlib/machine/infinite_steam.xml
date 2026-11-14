@@ -1,0 +1,18 @@
+<!--
+  Creative steam source: keeps its tank full of steam and pushes up to 65535 mB per tick into every neighbour
+  (CreativeSteamSource). The tank refills itself, so 3.0/3.1 saves need no conversion.
+-->
+<machine xmlns="https://moddev.zone/mmdlib/machine" version="1"
+         extends="mmdlib:base_machine" name="Infinite Steam Source">
+  <block hardness="1.5"/>
+  <appearance preset="model" model="poweradvantage:block/machine/infinite_steam"/>
+  <storage>
+    <fluids id="Fluids">
+      <tank id="steam" capacity="131070" role="output" fluid="poweradvantage:steam"/>
+    </fluids>
+  </storage>
+  <processor id="source" class="zone.moddev.mc.poweradvantage.machine.CreativeSteamSource"/>
+  <screen xmlns="https://moddev.zone/mmdlib/screen">
+    <fill name="machine"/>
+  </screen>
+</machine>

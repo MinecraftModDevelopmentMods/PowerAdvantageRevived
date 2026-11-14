@@ -1,12 +1,10 @@
 {
   "type": "poweradvantage:distilling",
-  "input": {
-    "type": "neoforge:compound",
-    "children": [
-      { "tag": "c:crude_oil" },
-      { "tag": "c:oils/crude" }
-    ],
-    "amount": 2
+  "inputs": {
+    "input": [{ "fluids": "#poweradvantage:crude_oils", "amount": 100 }]
   },
-  "output": { "id": "poweradvantage:refined_oil", "amount": 1 }
+  "outputs": {
+    "output": [{ "fluid": { "id": "poweradvantage:refined_oil", "amount": 50 } }]
+  },
+  "time": 100
 }

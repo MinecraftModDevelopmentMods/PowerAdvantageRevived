@@ -14,7 +14,6 @@ import net.neoforged.neoforge.gametest.GameTestHolder;
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 import zone.moddev.mc.poweradvantage.blocks.FluidSwitchBlock;
 import zone.moddev.mc.poweradvantage.init.ModContent;
-import zone.moddev.mc.poweradvantage.tiles.MachineBlockEntity;
 
 @GameTestHolder(PowerAdvantage.MODID)
 @PrefixGameTestTemplate(false)
@@ -46,7 +45,7 @@ public final class FluidSwitchGameTests {
         h.runAfterDelay(60, () -> {
             h.assertTrue(h.getBlockState(valve).getValue(FluidSwitchBlock.ACTIVE), "Removing power opens valve");
             h.assertTrue(input.fill(new FluidStack(Fluids.WATER, 1000), FluidAction.EXECUTE) == 1000, "Reopened valve rejoins route");
-            var sink = (MachineBlockEntity) level.getBlockEntity(h.absolutePos(new BlockPos(7, 3, 5)));
+            var sink = Machines.of(level.getBlockEntity(h.absolutePos(new BlockPos(7, 3, 5))));
             h.assertTrue(sink.fluids.tank(0).getFluidAmount() == 2000, "Valve cycle must conserve fluid");
             h.succeed();
         });

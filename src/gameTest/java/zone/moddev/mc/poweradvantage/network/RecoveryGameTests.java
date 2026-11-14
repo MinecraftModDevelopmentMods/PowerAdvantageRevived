@@ -1,5 +1,6 @@
 package zone.moddev.mc.poweradvantage.network;
 
+import zone.moddev.mc.poweradvantage.Machines;
 import java.util.*;
 import net.minecraft.core.*;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -16,7 +17,6 @@ import net.neoforged.neoforge.gametest.*;
 import zone.moddev.mc.poweradvantage.PowerAdvantage;
 import zone.moddev.mc.poweradvantage.blocks.FluidPipeBlock;
 import zone.moddev.mc.poweradvantage.init.ModContent;
-import zone.moddev.mc.poweradvantage.tiles.MachineBlockEntity;
 
 /** Test-only capability fixtures: absent in the release JAR. */
 @GameTestHolder(PowerAdvantage.MODID)
@@ -40,7 +40,7 @@ public final class RecoveryGameTests {
         var terminal=BuiltInRegistries.BLOCK.get(ModContent.id("fluid_pipe_terminal"));
         var sourcePos=new BlockPos(2,3,5);var ingress=new BlockPos(3,3,5);var target=new BlockPos(6,3,5);
         h.setBlock(sourcePos,tank);
-        var source=(MachineBlockEntity)level.getBlockEntity(h.absolutePos(sourcePos));
+        var source=Machines.of(level.getBlockEntity(h.absolutePos(sourcePos)));
         source.fluids.fill(new FluidStack(Fluids.WATER,1000),FluidAction.EXECUTE);
         h.setBlock(ingress,terminal.defaultBlockState().setValue(FluidPipeBlock.SOURCE,Direction.WEST));
         h.setBlock(new BlockPos(4,3,5),pipe);h.setBlock(new BlockPos(5,3,5),pipe);h.setBlock(target,Blocks.DIAMOND_BLOCK);
@@ -54,7 +54,7 @@ public final class RecoveryGameTests {
             h.setBlock(target,tank);
         });
         h.runAfterDelay(55,()->{
-            var sink=(MachineBlockEntity)level.getBlockEntity(h.absolutePos(target));
+            var sink=Machines.of(level.getBlockEntity(h.absolutePos(target)));
             h.assertTrue(sink.fluids.tank(0).getFluidAmount()==1000 && source.fluids.tank(0).isEmpty(),"Escrow must reach a restored destination exactly once");
             h.assertTrue(data.entries.stream().noneMatch(e->e.pipe().equals(h.absolutePos(ingress))),"Successful recovery must clear saved remainder");h.succeed();
         });

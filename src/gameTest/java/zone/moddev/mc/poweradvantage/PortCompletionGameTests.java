@@ -13,7 +13,6 @@ import net.neoforged.neoforge.gametest.*;
 import net.neoforged.neoforge.registries.RegisterEvent;
 import zone.moddev.mc.lib.common.recipes.CrushingRecipe;
 import zone.moddev.mc.poweradvantage.init.*;
-import zone.moddev.mc.poweradvantage.tiles.MachineBlockEntity;
 
 @EventBusSubscriber(modid = PowerAdvantage.MODID, bus = EventBusSubscriber.Bus.MOD)
 @GameTestHolder(PowerAdvantage.MODID)
@@ -77,7 +76,7 @@ public final class PortCompletionGameTests {
         for (String name : new String[]{"fluid_storage_tank", "fluid_metal_tank", "fluid_drain", "fluid_discharge", "infinite_steam", "infinite_power", "still"}) {
             var pos = new BlockPos(3, 3, 3);
             h.setBlock(pos, BuiltInRegistries.BLOCK.get(ModContent.id(name)));
-            var be = (MachineBlockEntity) h.getLevel().getBlockEntity(h.absolutePos(pos));
+            var be = h.getLevel().getBlockEntity(h.absolutePos(pos));
             var menu = new zone.moddev.mc.lib.gui.runtime.MachineMenu(1,
                 h.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL).getInventory(), be);
             h.assertTrue(menu.getType() == zone.moddev.mc.lib.gui.runtime.ScreenRuntime.MENUS.get(), "Machine must bind to MMDLib menu: " + name);

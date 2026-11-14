@@ -52,5 +52,10 @@
   "screen.poweradvantage.filter_overflow": "Prioriza el inventario inferior; si está lleno, usa la salida frontal",
   "screen.poweradvantage.converter_fe": "FE / RF",
   "screen.poweradvantage.converter_electricity": "Electricidad PA",
-  "screen.poweradvantage.electricity_amount": "{value} / {max} unidades de electricidad"
+  "screen.poweradvantage.electricity_amount": "{value} / {max} unidades de electricidad",
+  "screen.poweradvantage.redstone.fill_level": "Nivel de llenado",
+  "screen.poweradvantage.redstone.fill_level.description": "La intensidad de la señal sigue lo lleno que está el tanque",
+  "item.poweradvantage.fluid_intake_pump": "Bomba de admisión de fluidos",
+  "item.poweradvantage.fluid_output_pump": "Bomba de salida de fluidos",
+  "screen.poweradvantage.electricity_stored": "Electricidad PA: %s / %s"
 }

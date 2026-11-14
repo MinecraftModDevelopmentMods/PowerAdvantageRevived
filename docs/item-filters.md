@@ -91,6 +91,21 @@ machine. Rejected transfer remainders return to cargo. If a destination callback
 removes the filter, outstanding remainders drop at the original location rather
 than being restored into an orphaned block entity.
 
+## Why filters are not XML machines
+
+Since 3.2 Power Advantage's other machines are MMDLib XML machines
+(`mmdlib/machine/*.xml`). The filters stay on the Java block-entity path above,
+deliberately. Their routing lives in their item capability: cargo enters only from
+above or behind, and leaves only through the face the current cargo is routed to.
+Conveyors, hoppers and pipes all rely on that. MMDLib registers its own item
+capability for every XML machine with item slots, with fixed per-face side settings
+that can't express per-item routing, and Power Advantage can't replace it.
+
+Moving them would need a supported way for an XML machine to supply its own item
+capability, for example by opting out of MMDLib's default automation capability.
+Until MMDLib offers that, the filters keep their real cargo and sample slots,
+travel-direction placement and comparator output unchanged.
+
 ## Verification
 
 Server GameTests cover all eight registrations and recipes, XML menu construction,

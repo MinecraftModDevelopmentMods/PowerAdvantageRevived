@@ -20,8 +20,10 @@ units. As in PA2, the converter balances the electricity buffer around half capa
 - At the midpoint, no internal conversion is necessary.
 
 There is a reserve rather than immediate emptying of one buffer into the other.
-External users can draw directly from either store. Sub-batch differences around
-the midpoint wait until a complete exchange is possible.
+Other blocks can draw electricity directly; FE leaves only through the converter's
+own neighbor service, since MMDLib XML machines accept FE through their capability
+but don't offer it for extraction. Sub-batch differences around the midpoint wait
+until a complete exchange is possible.
 
 The converter services neighboring FE handlers automatically. Below half its FE
 capacity it pulls toward that midpoint; above half it exports the surplus. Neighbor
@@ -31,11 +33,11 @@ network or adapter to insert/extract through; this block does not implement the
 unported ElectricAdvantage cable network.
 
 Every face exposes both capability types, each with its own units. Facing is a
-model orientation, not a hidden input/output restriction. Neither buffer can be
-reentered through its capability while the converter is performing a transfer.
-Cached handlers refuse calls after the block is removed. Breaking the block drops
-the converter item; stored energy dissipates, as with a normal energy-storage block.
-Both buffers persist across ordinary saves and chunk reloads.
+model orientation, not a hidden input/output restriction. Cached electricity handlers
+refuse calls after the block is removed. Breaking the block drops the converter item;
+stored energy dissipates, as with a normal energy-storage block. Both buffers persist
+across ordinary saves and chunk reloads. Converters in worlds from 3.0 and 3.1 start
+with empty buffers after updating to 3.2.
 
 ## Public electrical boundary
 
@@ -59,31 +61,23 @@ mode to this energy-storage boundary when its rules are defined. The converter
 therefore bridges a distinct electrical model rather than silently treating its
 quantities as FE.
 
-## Settings and screen
+## XML machine, settings and screen
 
-MMDLib registers the block and entity through the `poweradvantage:electricity_converter`
-implementation factories. `power.ConverterSettings` is constructor- and codec-backed:
+Since 3.2 the converter is an MMDLib XML machine,
+[`mmdlib/machine/converter_rf_electricity.xml`](../src/main/resources/mmdlib/machine/converter_rf_electricity.xml).
+The machine's MMDLib energy buffer is the FE side. Its stored processor,
+`machine.ElectricityExchange`, keeps the electricity buffer as a saved processor
+variable and serves it as the `PowerCapabilities.ELECTRICITY` capability.
+`machine.FeExchangeProcessor` holds the neighbor service shared with the steam converter.
 
-```json
-{
-  "fe_capacity": 1000,
-  "electricity_capacity": 8000,
-  "fe_quantum": 1,
-  "electricity_quantum": 4,
-  "fe_per_tick": 1000
-}
-```
+The sizes, ratio and rate are `power.ConverterSettings.DEFAULT`: 1,000 FE, 8,000
+electricity units, 1 FE to 4 units, and 1,000 FE per tick. They are no longer read
+from block-entity data. `fe_per_tick` bounds the automatic FE service phase and,
+separately, the FE-equivalent amount converted in one tick. The electricity handler
+accepts/extracts up to available capacity/contents per call.
 
-These are factory settings for MMDLib standalone definitions or code constructing
-a converter; this pass does not introduce a global TOML configuration. Capacities
-and rates must accommodate a complete positive exchange batch. `fe_per_tick` bounds
-the automatic FE service phase and, separately, the FE-equivalent amount converted
-in one tick. The external FE handler also uses that value as its per-call limit.
-The electricity handler accepts/extracts up to available capacity/contents per call.
-
-MMDLib's XML screen shows the two stores separately and handles opening, menus,
-value synchronization and rendering. It has no item slots. Labels and gauge
-placeholders are supplied in every existing locale.
+The screen is MMDLib's standard powered machine screen: an FE gauge, a line showing
+stored electricity, pause, side configuration, redstone control and statistics.
 
 The old recipe used a PSU, steel frame and redstone block. The port uses the
 `poweradvantage:power_supply_units` tag for the PSU. That tag is empty until an
@@ -94,10 +88,9 @@ is available in the creative tab and via commands independently of a PSU provide
 
 Server tests exercise capability registration on all six faces, XML menu binding,
 FE and electricity simulation, both conversion directions, retained partial batches,
-persistence, stale handlers, custom ratios/rates and actual neighboring FE sources
-and sinks. Their conservation assertions include energy delivered to consumers.
+persistence, stale electricity handlers, custom ratios/rates (through
+`ElectricityExchange.exchange`) and actual neighboring FE sources and sinks. Their conservation assertions include energy delivered to consumers.
 
 The [steam converter](steam-converter.md) is now implemented at eight FE/RF per
 millibucket, following PA2's direct fluid-energy amount mapping. Both converters
-share `BufferedConverterBlockEntity` for FE storage, guarded ports and neighbor
-service. Quantum remains without implemented consumers in the bundled reference.
+share `FeExchangeProcessor` for neighbor service. Quantum remains without implemented consumers in the bundled reference.

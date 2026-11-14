@@ -1,0 +1,16 @@
+<!--
+  Creative FE source: keeps its buffer full and pushes 4096 FE per tick into every neighbour
+  (CreativeEnergySource). The buffer refills itself, so 3.0/3.1 saves need no conversion.
+-->
+<machine xmlns="https://moddev.zone/mmdlib/machine" version="1"
+         extends="mmdlib:base_powered_machine" name="Infinite Power Source">
+  <block hardness="1.5"/>
+  <appearance preset="model" model="poweradvantage:block/machine/infinite_power"/>
+  <storage>
+    <energy id="energy" capacity="65535" input-rate="0" output-rate="4096"/>
+  </storage>
+  <processor id="source" class="zone.moddev.mc.poweradvantage.machine.CreativeEnergySource"/>
+  <screen xmlns="https://moddev.zone/mmdlib/screen">
+    <fill name="machine"/>
+  </screen>
+</machine>

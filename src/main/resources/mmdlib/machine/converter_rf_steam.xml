@@ -1,0 +1,21 @@
+<!--
+  Steam-RF Transformer: FE/RF to steam at 8 FE to 1 mB (SteamExchange).
+
+  The steam storage ID is "Steam", the key 3.0 and 3.1 saved it under, so transformers in those worlds keep their
+  steam. Their buffered FE is not carried over.
+-->
+<machine xmlns="https://moddev.zone/mmdlib/machine" version="1"
+         extends="mmdlib:base_powered_machine" name="Steam-RF Transformer">
+  <block hardness="1.5" no-occlusion="true"/>
+  <appearance preset="model" model="poweradvantage:block/machine/converter_rf_steam"/>
+  <storage>
+    <energy id="energy" capacity="1000" input-rate="1000" output-rate="1000"/>
+    <fluids id="Steam">
+      <tank id="steam" capacity="1000" role="storage" fluid="poweradvantage:steam"/>
+    </fluids>
+  </storage>
+  <processor id="exchange" class="zone.moddev.mc.poweradvantage.machine.SteamExchange"/>
+  <screen xmlns="https://moddev.zone/mmdlib/screen">
+    <fill name="machine"/>
+  </screen>
+</machine>

@@ -1,0 +1,6 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "poweradvantage:item/fluid_output_pump"
+  }
+}

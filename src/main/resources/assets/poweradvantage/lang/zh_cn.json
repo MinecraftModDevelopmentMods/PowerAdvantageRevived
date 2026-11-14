@@ -52,5 +52,10 @@
   "screen.poweradvantage.filter_overflow": "优先使用下方物品栏；装满后向前输出",
   "screen.poweradvantage.converter_fe": "FE / RF",
   "screen.poweradvantage.converter_electricity": "PA 电力",
-  "screen.poweradvantage.electricity_amount": "{value} / {max} 电力单位"
+  "screen.poweradvantage.electricity_amount": "{value} / {max} 电力单位",
+  "screen.poweradvantage.redstone.fill_level": "填充程度",
+  "screen.poweradvantage.redstone.fill_level.description": "信号强度随储罐的填充程度变化",
+  "item.poweradvantage.fluid_intake_pump": "流体吸入泵",
+  "item.poweradvantage.fluid_output_pump": "流体输出泵",
+  "screen.poweradvantage.electricity_stored": "PA 电力：%s / %s"
 }

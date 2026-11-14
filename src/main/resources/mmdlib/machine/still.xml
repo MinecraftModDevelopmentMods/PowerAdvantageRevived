@@ -1,0 +1,27 @@
+<!--
+  Distillery ("Distillation Furnace"): fluid in, fluid out, through poweradvantage:distilling machine recipes.
+
+  The fluid storage ID is "Fluids", with the input tank first and the output tank second: the key and order
+  Power Advantage 3.0 and 3.1 saved the Distillery's tanks in, so stills in those worlds keep their contents.
+
+  The front shows a lit furnace while a recipe runs. Fluid Intake and Fluid Output Pumps installed in the input and
+  output groups' addon slots pull crude oil in and push products out, as 3.1 stills did on their own.
+-->
+<machine xmlns="https://moddev.zone/mmdlib/machine" version="1"
+         extends="mmdlib:base_machine" name="Distillation Furnace">
+  <block hardness="1.5" no-occlusion="true"/>
+  <appearance preset="model" model="poweradvantage:block/machine/still">
+    <part id="front_idle" model="poweradvantage:block/machine/still_front_off"
+          when="!$processors.still.running"/>
+    <part id="front_lit" model="poweradvantage:block/machine/still_front_on"
+          when="$processors.still.running"/>
+  </appearance>
+  <storage>
+    <fluids id="Fluids">
+      <tank id="input" capacity="4000" role="input"/>
+      <tank id="output" capacity="4000" role="output"/>
+    </fluids>
+  </storage>
+  <recipe-type id="poweradvantage:distilling" declare="true" name="Distilling"/>
+  <processor id="still" recipe-type="poweradvantage:distilling"/>
+</machine>

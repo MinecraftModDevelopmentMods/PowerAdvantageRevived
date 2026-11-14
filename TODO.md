@@ -111,9 +111,12 @@ unless noted.
 ## Done in this port
 
 - MMDLib 2.0 XML screens for all machines, including the Distillery.
+- 3.2: every machine except the item filters is an MMDLib 2.0.2 XML machine (`mmdlib/machine/*.xml`), loading
+  3.0+ saves. See [item filters](docs/item-filters.md#why-filters-are-not-xml-machines) for why they stay Java.
 - Crude oil, refined oil and steam fluids, blocks and buckets.
-- Distillery with a data-driven `poweradvantage:distilling` recipe type. The default recipe is 2 crude oil → 1 refined oil;
-  duration is the input:output ratio in ticks, rounded up.
+- Distillery with a data-driven `poweradvantage:distilling` recipe type. Since 3.2 it is an MMDLib XML machine and the
+  type is an MMDLib machine recipe type; the default recipe is 100 crude oil → 50 refined oil in 100 ticks.
+  See [distillation](docs/distillation.md).
 
 ## First PA2 restoration pass
 
