@@ -22,4 +22,7 @@
     install a pump in its input and output groups for 3.1's behaviour. Existing stills keep their tank contents.
   - `api.distillation` is deprecated but still works for addons built against 3.0/3.1: `DistillingRecipe.find` and
     `accepts` now read the machine recipes. `init.Recipes` is removed.
+  - The Infinite Power Source, Infinite Steam Source, Drain and Discharge Grate are XML machines, with their 3.1
+    behaviour in Power Advantage processors. Each can be paused from its screen. The Infinite Power Source still
+    pushes 4096 FE per tick into every neighbour, but other blocks can no longer pull power out of it.
   - XML machines resist explosions like other blocks of their hardness (1.5) instead of 6.

@@ -9,7 +9,6 @@ import zone.moddev.mc.lib.api.redstone.RedstoneControl;
 import zone.moddev.mc.lib.api.redstone.RedstoneOutput;
 import zone.moddev.mc.lib.machine.feature.ProcessorMachine;
 import zone.moddev.mc.lib.machine.feature.ProcessorState;
-import zone.moddev.mc.lib.machine.feature.StoredProcessor;
 import zone.moddev.mc.lib.machine.neoforge.DefinedMachineEntity;
 
 /**
@@ -19,7 +18,7 @@ import zone.moddev.mc.lib.machine.neoforge.DefinedMachineEntity;
  * processor, whether newly placed or loaded from one of those saves, it sets every face to emit the fill level.
  * Players can change any face afterwards; the defaults are never applied again.
  */
-public final class TankLevelSignal extends StoredProcessor implements IRedstoneOutput {
+public final class TankLevelSignal extends PassiveProcessor implements IRedstoneOutput {
     /**
      * Stable redstone output ID, saved in each face's source selection.
      */
@@ -40,27 +39,6 @@ public final class TankLevelSignal extends StoredProcessor implements IRedstoneO
      * Creates the processor; MMDLib constructs one per tank, plus prototypes for validation.
      */
     public TankLevelSignal() {
-    }
-
-    /**
-     * Tanks have no work to start.
-     *
-     * @param state this processor's stored state
-     * @param context machine hosting the processor
-     * @return false
-     */
-    @Override public boolean canStart(ProcessorState state, ProcessorMachine context) { return false; }
-
-    /**
-     * Never called, since no work starts; finishes immediately if it is.
-     *
-     * @param state this processor's stored state
-     * @param context machine hosting the processor
-     * @param deltaTicks ticks simulated by this call
-     * @return idle
-     */
-    @Override public ProcessState process(ProcessorState state, ProcessorMachine context, int deltaTicks) {
-        return ProcessState.IDLE;
     }
 
     /**

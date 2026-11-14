@@ -1,0 +1,20 @@
+<!--
+  Fluid Drain: every 10 ticks pushes its tank into every neighbour and collects one bucket of fluid from the world
+  above (WorldFluidPump.Drain).
+
+  The fluid storage ID is "Fluids", the key 3.0 and 3.1 saved it under, so drains in those worlds keep their contents.
+-->
+<machine xmlns="https://moddev.zone/mmdlib/machine" version="1"
+         extends="mmdlib:base_machine" name="Drain">
+  <block hardness="1.5"/>
+  <appearance preset="model" model="poweradvantage:block/machine/fluid_drain"/>
+  <storage>
+    <fluids id="Fluids">
+      <tank id="contents" capacity="2000" role="storage"/>
+    </fluids>
+  </storage>
+  <processor id="drain" class="zone.moddev.mc.poweradvantage.machine.WorldFluidPump$Drain"/>
+  <screen xmlns="https://moddev.zone/mmdlib/screen">
+    <fill name="machine"/>
+  </screen>
+</machine>

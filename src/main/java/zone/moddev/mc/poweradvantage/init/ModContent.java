@@ -1,26 +1,18 @@
 package zone.moddev.mc.poweradvantage.init;
 
-import com.mojang.serialization.Codec;
-import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.*;
-import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.event.lifecycle.FMLConstructModEvent;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.registries.*;
 import zone.moddev.mc.lib.MMDLib;
 import zone.moddev.mc.lib.api.*;
-import zone.moddev.mc.lib.api.capabilities.MachineCapabilities;
-import zone.moddev.mc.lib.common.factories.BlockEntityFactory;
 import zone.moddev.mc.lib.common.runtime.RuntimeContentRegistrar;
 import zone.moddev.mc.lib.common.types.*;
 import zone.moddev.mc.poweradvantage.PowerAdvantage;
-import zone.moddev.mc.poweradvantage.blocks.MachineBlock;
-import zone.moddev.mc.poweradvantage.tiles.*;
 
 /**
  * Registers Power Advantage factories, queues its MMDLib standalone plans and installs capability,
@@ -60,34 +52,6 @@ public final class ModContent {
         ElectricityConverterContent.registerFactories();
         SteamConverterContent.registerFactories();
         var api = MaterialExtensions.GLOBAL;
-        api.registerBlockImplementation(id("machine"), new BlockImplementation<MachineBlock>() {
-            /**
-             * Identifies the exact block implementation created by this factory.
-             *
-             * @return implementation class token
-             */
-            public Class<MachineBlock> blockClass() { return MachineBlock.class; }
-            /**
-             * Rejects legacy factory calls that omit the prepared registration context.
-             *
-             * @param material bound MMDLib material or stats-free standalone host
-             * @param definition planned block or block-entity definition
-             * @return never returns normally
-             * @throws IllegalStateException always; this factory requires a complete context
-             */
-            public MachineBlock create(MMDMaterial material, MMDBlock definition) {
-                throw new IllegalStateException("Machine requires a block-entity binding");
-            }
-            /**
-             * Creates the block from its complete MMDLib properties and optional entity binding.
-             *
-             * @param context complete MMDLib block registration context
-             * @return new block or block entity for the prepared context
-             */
-            public MachineBlock create(BlockContext context) {
-                return new MachineBlock(context.properties(), context.blockEntity().orElseThrow().as(MachineBlockEntity.class));
-            }
-        });
         api.registerBlockImplementation(id("fluid_switch"), new BlockImplementation<zone.moddev.mc.poweradvantage.blocks.FluidSwitchBlock>() {
             public Class<zone.moddev.mc.poweradvantage.blocks.FluidSwitchBlock> blockClass() {
                 return zone.moddev.mc.poweradvantage.blocks.FluidSwitchBlock.class;
@@ -122,45 +86,6 @@ public final class ModContent {
              * @return new block or block entity for the prepared context
              */
             public Block create(BlockContext context) { return new Block(context.properties().noOcclusion()); }
-        });
-        zone.moddev.mc.lib.util.Registries.BLOCK_ENTITY_FACTORIES.register(id("machine"), new BlockEntityFactory<MachineBlockEntity, MachineSettings>() {
-            /**
-             * Identifies the exact machine entity class created by this factory.
-             *
-             * @return machine entity class token
-             */
-            public Class<MachineBlockEntity> blockEntityClass() { return MachineBlockEntity.class; }
-            /**
-             * Provides validation/decoding of machine behavior and capacity settings.
-             *
-             * @return machine-settings codec
-             */
-            public Codec<MachineSettings> settingsCodec() { return MachineSettings.CODEC; }
-            /**
-             * Creates the machine entity with the supplied registered type and decoded settings.
-             *
-             * @param type registered entity type passed unchanged to the machine constructor
-             * @param pos block position being queried or changed
-             * @param state current block state
-             * @param definition planned block or block-entity definition
-             * @param settings decoded machine behavior and capacity settings
-             * @return new block or block entity for the prepared context
-             */
-            public MachineBlockEntity create(BlockEntityType<MachineBlockEntity> type, BlockPos pos, BlockState state,
-                    MMDBlockEntity definition, MachineSettings settings) {
-                return new MachineBlockEntity(type, pos, state, settings);
-            }
-            /**
-             * Supplies server-only ticking for the prepared machine definition.
-             *
-             * @param level owning world; server-only engines require its server thread
-             * @param definition planned block or block-entity definition
-             * @param settings decoded machine behavior and capacity settings
-             * @return server ticker, or null on the client
-             */
-            public BlockEntityTicker<MachineBlockEntity> ticker(Level level, MMDBlockEntity definition, MachineSettings settings) {
-                return level.isClientSide ? null : MachineBlockEntity::serverTick;
-            }
         });
         for (boolean terminal : new boolean[]{false,true}) {
             api.registerBlockImplementation(id(terminal ? "fluid_terminal" : "fluid_pipe"), new BlockImplementation<zone.moddev.mc.poweradvantage.blocks.FluidPipeBlock>() {
@@ -253,7 +178,6 @@ public final class ModContent {
      *
      * @param event NeoForge registration or lifecycle event
      */
-    @SuppressWarnings("unchecked")
     private void capabilities(RegisterCapabilitiesEvent event) {
         zone.moddev.mc.poweradvantage.machine.FluidPumps.registerCapabilities(event);
         for (String name : new String[]{"fluid_pipe","fluid_pipe_terminal","fluid_switch"}) {
@@ -272,13 +196,7 @@ public final class ModContent {
                 ElectricityConverterContent.registerCapabilities(event, holder.get());
                 return;
             }
-            if (id.getPath().startsWith("item_filter_")) {
-                FilterContent.registerCapabilities(event, holder.get());
-                return;
-            }
-            var type = (BlockEntityType<MachineBlockEntity>) holder.get();
-            if (id.getPath().equals("infinite_power")) MachineCapabilities.energy(event, type, be -> be.energy);
-            else MachineCapabilities.fluids(event, type, be -> be.fluids);
+            if (id.getPath().startsWith("item_filter_")) FilterContent.registerCapabilities(event, holder.get());
         });
     }
 }

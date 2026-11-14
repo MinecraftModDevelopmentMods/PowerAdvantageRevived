@@ -1,8 +1,0 @@
-{
-    "parent": "block/cube_bottom_top",
-    "textures": {
-        "top": "poweradvantage:block/fluid_discharge_side",
-        "bottom": "poweradvantage:block/fluid_discharge_face",
-        "side": "poweradvantage:block/fluid_discharge_side"
-    }
-}
